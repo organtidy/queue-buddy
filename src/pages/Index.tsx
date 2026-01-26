@@ -50,14 +50,13 @@ const Index = () => {
             aria-label={isMuted ? "Ativar som" : "Silenciar"}
             className="text-muted-foreground hover:text-foreground"
           >
-            {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </Button>
-          <Link
-            to="/admin"
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label="Área administrativa"
-          >
-            <Settings className="w-6 h-6" />
+          <Link to="/admin">
+            <Button variant="secondary" size="sm" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Área do Barbeiro
+            </Button>
           </Link>
         </div>
       </header>
