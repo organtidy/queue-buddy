@@ -1,12 +1,16 @@
 import { Scissors, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
+import { useQueueNotification } from "@/hooks/useQueueNotification";
 import { QueueIndicator } from "@/components/QueueIndicator";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const { queueState, loading, error } = useQueueState();
+  
+  // Play sound notification when queue count changes
+  useQueueNotification(queueState?.current_count);
 
   if (loading) {
     return (
