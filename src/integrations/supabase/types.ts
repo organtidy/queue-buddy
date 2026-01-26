@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      queue_state: {
+        Row: {
+          avg_wait_time: number
+          current_count: number
+          id: string
+          is_open: boolean
+          last_updated: string
+        }
+        Insert: {
+          avg_wait_time?: number
+          current_count?: number
+          id?: string
+          is_open?: boolean
+          last_updated?: string
+        }
+        Update: {
+          avg_wait_time?: number
+          current_count?: number
+          id?: string
+          is_open?: boolean
+          last_updated?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
