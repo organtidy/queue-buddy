@@ -189,6 +189,7 @@ export default function Admin() {
             <Switch
               checked={queueState.is_open}
               onCheckedChange={() => handleAction(toggleOpen, queueState.is_open ? "Loja fechada" : "Loja aberta")}
+              variant="status"
               className="scale-150"
             />
           </div>
