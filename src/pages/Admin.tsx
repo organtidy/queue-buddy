@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueueState } from "@/hooks/useQueueState";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scissors, Plus, Minus, RotateCcw, LogOut, Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { StoreClosedTooltip } from "@/components/admin/StoreClosedTooltip";
 
 const ADMIN_PIN = "1234"; // PIN simples para demo
 
@@ -17,7 +17,7 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [showClosedTooltip, setShowClosedTooltip] = useState(false);
 
   const {
     queueState,
@@ -101,6 +101,15 @@ export default function Admin() {
     }
   };
 
+  const handleQueueAction = async (action: () => Promise<void>, successMessage: string) => {
+    if (!queueState?.is_open) {
+      setShowClosedTooltip(true);
+      setTimeout(() => setShowClosedTooltip(false), 3000);
+      return;
+    }
+    await handleAction(action, successMessage);
+  };
+
   if (isLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -177,7 +186,7 @@ export default function Admin() {
       </header>
 
       {/* Store status toggle */}
-      <Card className="mb-6">
+      <Card className="mb-6 relative">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div>
@@ -193,6 +202,7 @@ export default function Admin() {
               className="scale-150"
             />
           </div>
+          <StoreClosedTooltip isVisible={showClosedTooltip} />
         </CardContent>
       </Card>
 
@@ -212,7 +222,7 @@ export default function Admin() {
             <Button
               size="lg"
               className="h-24 text-3xl"
-              onClick={() => handleAction(incrementCount, "Cliente adicionado")}
+              onClick={() => handleQueueAction(incrementCount, "Cliente adicionado")}
             >
               <Plus className="w-10 h-10" />
             </Button>
@@ -220,7 +230,7 @@ export default function Admin() {
               size="lg"
               variant="secondary"
               className="h-24 text-3xl"
-              onClick={() => handleAction(decrementCount, "Cliente removido")}
+              onClick={() => handleQueueAction(decrementCount, "Cliente removido")}
               disabled={queueState.current_count === 0}
             >
               <Minus className="w-10 h-10" />
@@ -230,7 +240,7 @@ export default function Admin() {
           <Button
             variant="destructive"
             className="w-full h-14"
-            onClick={() => handleAction(resetCount, "Fila zerada")}
+            onClick={() => handleQueueAction(resetCount, "Fila zerada")}
           >
             <RotateCcw className="w-5 h-5 mr-2" />
             Zerar Fila
