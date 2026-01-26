@@ -1,4 +1,5 @@
 import { Scissors } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function ClosedOverlay() {
   return (
@@ -12,6 +13,12 @@ export function ClosedOverlay() {
         <br />
         Volte mais tarde!
       </p>
+      <Link
+        to="/admin"
+        className="mt-8 text-sm text-muted-foreground hover:text-foreground underline"
+      >
+        Área do barbeiro
+      </Link>
     </div>
   );
 }
