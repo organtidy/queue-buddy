@@ -1,16 +1,17 @@
-import { Scissors, Settings } from "lucide-react";
+import { Scissors, Settings, Volume2, VolumeX } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
 import { QueueIndicator } from "@/components/QueueIndicator";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { queueState, loading, error } = useQueueState();
   
   // Play sound notification when queue count changes
-  useQueueNotification(queueState?.current_count);
+  const { isMuted, toggleMute } = useQueueNotification(queueState?.current_count);
 
   if (loading) {
     return (
@@ -41,13 +42,24 @@ const Index = () => {
             Filômetro <span className="text-primary">Ásperus</span>
           </h1>
         </div>
-        <Link
-          to="/admin"
-          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          aria-label="Área administrativa"
-        >
-          <Settings className="w-6 h-6" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            aria-label={isMuted ? "Ativar som" : "Silenciar"}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+          </Button>
+          <Link
+            to="/admin"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label="Área administrativa"
+          >
+            <Settings className="w-6 h-6" />
+          </Link>
+        </div>
       </header>
 
       {/* Main content */}

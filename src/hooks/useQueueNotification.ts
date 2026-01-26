@@ -1,10 +1,24 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export function useQueueNotification(count: number | undefined) {
+  const [isMuted, setIsMuted] = useState(() => {
+    const saved = localStorage.getItem("queue-notification-muted");
+    return saved === "true";
+  });
   const prevCountRef = useRef<number | undefined>(undefined);
   const audioContextRef = useRef<AudioContext | null>(null);
 
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const newValue = !prev;
+      localStorage.setItem("queue-notification-muted", String(newValue));
+      return newValue;
+    });
+  }, []);
+
   const playNotificationSound = (isIncrease: boolean) => {
+    if (isMuted) return;
+    
     try {
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -51,5 +65,7 @@ export function useQueueNotification(count: number | undefined) {
       playNotificationSound(isIncrease);
       prevCountRef.current = count;
     }
-  }, [count]);
+  }, [count, isMuted]);
+
+  return { isMuted, toggleMute };
 }
