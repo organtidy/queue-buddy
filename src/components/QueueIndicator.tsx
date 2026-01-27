@@ -95,20 +95,18 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
         {message}
       </div>
 
-      {/* Wait time */}
-      <div className="text-center">
-        <p className="text-muted-foreground text-sm uppercase tracking-wider mb-1">
+      {/* Wait time and people count - closer together */}
+      <div className="text-center space-y-1">
+        <p className="text-muted-foreground text-sm uppercase tracking-wider">
           Tempo estimado de espera
         </p>
         <p className="text-foreground text-2xl sm:text-3xl font-bold">
           {waitTimeFormatted}
         </p>
+        <p className="text-muted-foreground text-base">
+          {count === 1 ? "pessoa na fila" : "pessoas na fila"}
+        </p>
       </div>
-
-      {/* People label */}
-      <p className="text-muted-foreground text-lg">
-        {count === 1 ? "pessoa na fila" : "pessoas na fila"}
-      </p>
     </div>
   );
 }
