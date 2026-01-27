@@ -32,6 +32,11 @@ const Index = () => {
     );
   }
 
+  // Show closed overlay only when shop is actually closed
+  if (!queueState.is_open) {
+    return <ClosedOverlay />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
@@ -75,9 +80,6 @@ const Index = () => {
           Atualizado em tempo real
         </p>
       </footer>
-
-      {/* Closed overlay */}
-      {!queueState.is_open && <ClosedOverlay />}
     </div>
   );
 };
