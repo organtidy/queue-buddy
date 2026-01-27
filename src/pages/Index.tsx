@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
 import { QueueIndicator } from "@/components/QueueIndicator";
+import { BarbershopAnimation } from "@/components/BarbershopAnimation";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -67,11 +68,14 @@ const Index = () => {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 gap-8">
         <QueueIndicator
           count={queueState.current_count}
           avgWaitTime={queueState.avg_wait_time}
         />
+        
+        {/* Barbershop animation */}
+        <BarbershopAnimation count={queueState.current_count} />
       </main>
 
       {/* Footer */}
