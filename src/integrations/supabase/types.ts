@@ -21,6 +21,10 @@ export type Database = {
           id: string
           is_open: boolean
           last_updated: string
+          manual_wait_time: number | null
+          message_green: string | null
+          message_red: string | null
+          message_yellow: string | null
         }
         Insert: {
           avg_wait_time?: number
@@ -28,6 +32,10 @@ export type Database = {
           id?: string
           is_open?: boolean
           last_updated?: string
+          manual_wait_time?: number | null
+          message_green?: string | null
+          message_red?: string | null
+          message_yellow?: string | null
         }
         Update: {
           avg_wait_time?: number
@@ -35,6 +43,10 @@ export type Database = {
           id?: string
           is_open?: boolean
           last_updated?: string
+          manual_wait_time?: number | null
+          message_green?: string | null
+          message_red?: string | null
+          message_yellow?: string | null
         }
         Relationships: []
       }
