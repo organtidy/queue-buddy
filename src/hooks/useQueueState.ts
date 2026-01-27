@@ -7,6 +7,10 @@ export interface QueueState {
   is_open: boolean;
   avg_wait_time: number;
   last_updated: string;
+  manual_wait_time: number | null;
+  message_green: string | null;
+  message_yellow: string | null;
+  message_red: string | null;
 }
 
 export function useQueueState() {
@@ -94,6 +98,18 @@ export function useQueueState() {
     await updateQueueState({ avg_wait_time: time });
   };
 
+  const setManualWaitTime = async (time: number | null) => {
+    await updateQueueState({ manual_wait_time: time });
+  };
+
+  const setMessages = async (green: string, yellow: string, red: string) => {
+    await updateQueueState({ 
+      message_green: green, 
+      message_yellow: yellow, 
+      message_red: red 
+    });
+  };
+
   return {
     queueState,
     loading,
@@ -103,5 +119,7 @@ export function useQueueState() {
     resetCount,
     toggleOpen,
     setAvgWaitTime,
+    setManualWaitTime,
+    setMessages,
   };
 }

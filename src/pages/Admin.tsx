@@ -22,6 +22,8 @@ export default function Admin() {
     resetCount,
     toggleOpen,
     setAvgWaitTime,
+    setManualWaitTime,
+    setMessages,
   } = useQueueState();
 
   useEffect(() => {
@@ -102,7 +104,13 @@ export default function Admin() {
 
       <SettingsCard
         avgWaitTime={queueState.avg_wait_time}
-        onSave={(time) => handleAction(() => setAvgWaitTime(time), "Tempo atualizado")}
+        manualWaitTime={queueState.manual_wait_time}
+        messageGreen={queueState.message_green}
+        messageYellow={queueState.message_yellow}
+        messageRed={queueState.message_red}
+        onSaveAvgTime={(time) => handleAction(() => setAvgWaitTime(time), "Tempo médio atualizado")}
+        onSaveManualTime={(time) => handleAction(() => setManualWaitTime(time), time === null ? "Tempo manual removido" : "Tempo manual atualizado")}
+        onSaveMessages={(green, yellow, red) => handleAction(() => setMessages(green, yellow, red), "Mensagens atualizadas")}
       />
     </div>
   );
