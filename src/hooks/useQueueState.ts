@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface CutDuration {
+  duration: number;
+  timestamp: string;
+}
+
 export interface QueueState {
   id: string;
   current_count: number;
@@ -13,7 +18,10 @@ export interface QueueState {
   message_red: string | null;
   admin_pin: string | null;
   secret_phrase: string | null;
+  cut_durations: CutDuration[];
 }
+
+const MAX_STORED_CUTS = 10;
 
 export function useQueueState() {
   const [queueState, setQueueState] = useState<QueueState | null>(null);
@@ -30,8 +38,21 @@ export function useQueueState() {
 
       if (error) {
         setError(error.message);
-      } else {
-        setQueueState(data);
+      } else if (data) {
+        const rawDurations = data.cut_durations;
+        const parsedDurations: CutDuration[] = Array.isArray(rawDurations) 
+          ? rawDurations.map((d: unknown) => {
+              const item = d as { duration?: number; timestamp?: string };
+              return {
+                duration: item.duration ?? 0,
+                timestamp: item.timestamp ?? "",
+              };
+            })
+          : [];
+        setQueueState({
+          ...data,
+          cut_durations: parsedDurations,
+        });
       }
       setLoading(false);
     };
@@ -50,7 +71,21 @@ export function useQueueState() {
         },
         (payload) => {
           if (payload.new) {
-            setQueueState(payload.new as QueueState);
+            const newData = payload.new as Record<string, unknown>;
+            const rawDurations = newData.cut_durations;
+            const parsedDurations: CutDuration[] = Array.isArray(rawDurations) 
+              ? rawDurations.map((d: unknown) => {
+                  const item = d as { duration?: number; timestamp?: string };
+                  return {
+                    duration: item.duration ?? 0,
+                    timestamp: item.timestamp ?? "",
+                  };
+                })
+              : [];
+            setQueueState({
+              ...newData,
+              cut_durations: parsedDurations,
+            } as QueueState);
           }
         }
       )
@@ -64,12 +99,22 @@ export function useQueueState() {
   const updateQueueState = async (updates: Partial<Omit<QueueState, "id" | "last_updated">>) => {
     if (!queueState) return;
 
+    // Convert cut_durations to JSON-compatible format if present
+    const dbUpdates: Record<string, unknown> = {
+      ...updates,
+      last_updated: new Date().toISOString(),
+    };
+    
+    if (updates.cut_durations) {
+      dbUpdates.cut_durations = updates.cut_durations.map(d => ({
+        duration: d.duration,
+        timestamp: d.timestamp,
+      }));
+    }
+
     const { error } = await supabase
       .from("queue_state")
-      .update({
-        ...updates,
-        last_updated: new Date().toISOString(),
-      })
+      .update(dbUpdates)
       .eq("id", queueState.id);
 
     if (error) {
@@ -112,6 +157,31 @@ export function useQueueState() {
     });
   };
 
+  const addCutDuration = async (duration: number) => {
+    if (!queueState) return;
+
+    const newCutDuration: CutDuration = {
+      duration,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Get current durations and add new one
+    const currentDurations = queueState.cut_durations || [];
+    const updatedDurations = [...currentDurations, newCutDuration]
+      .slice(-MAX_STORED_CUTS); // Keep only last 10
+
+    // Calculate new average
+    const validDurations = updatedDurations.map(d => d.duration);
+    const newAvg = validDurations.length > 0 
+      ? Math.round(validDurations.reduce((a, b) => a + b, 0) / validDurations.length)
+      : queueState.avg_wait_time;
+
+    await updateQueueState({ 
+      cut_durations: updatedDurations,
+      avg_wait_time: newAvg,
+    });
+  };
+
   const validatePin = async (pin: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from("queue_state")
@@ -140,6 +210,12 @@ export function useQueueState() {
     await updateQueueState({ secret_phrase: newPhrase });
   };
 
+  // Get effective wait time (manual takes priority)
+  const getEffectiveWaitTime = (): number => {
+    if (!queueState) return 30;
+    return queueState.manual_wait_time ?? queueState.avg_wait_time;
+  };
+
   return {
     queueState,
     loading,
@@ -151,9 +227,11 @@ export function useQueueState() {
     setAvgWaitTime,
     setManualWaitTime,
     setMessages,
+    addCutDuration,
     validatePin,
     validateSecretPhrase,
     updatePin,
     updateSecretPhrase,
+    getEffectiveWaitTime,
   };
 }

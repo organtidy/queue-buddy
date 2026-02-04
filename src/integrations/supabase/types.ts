@@ -52,6 +52,7 @@ export type Database = {
           admin_pin: string | null
           avg_wait_time: number
           current_count: number
+          cut_durations: Json | null
           id: string
           is_open: boolean
           last_updated: string
@@ -65,6 +66,7 @@ export type Database = {
           admin_pin?: string | null
           avg_wait_time?: number
           current_count?: number
+          cut_durations?: Json | null
           id?: string
           is_open?: boolean
           last_updated?: string
@@ -78,6 +80,7 @@ export type Database = {
           admin_pin?: string | null
           avg_wait_time?: number
           current_count?: number
+          cut_durations?: Json | null
           id?: string
           is_open?: boolean
           last_updated?: string
