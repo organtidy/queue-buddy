@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      professionals: {
+        Row: {
+          color: string
+          created_at: string
+          current_client_time: string | null
+          id: string
+          is_active: boolean
+          name: string
+          next_clients: Json | null
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          current_client_time?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          next_clients?: Json | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          current_client_time?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          next_clients?: Json | null
+        }
+        Relationships: []
+      }
       queue_state: {
         Row: {
           avg_wait_time: number
