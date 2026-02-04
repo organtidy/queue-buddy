@@ -4,9 +4,6 @@ import { cn } from "@/lib/utils";
 
 interface BarbershopSceneProps {
   queueCount: number;
-  isAdmin?: boolean;
-  pendingAction?: "add" | "remove" | null;
-  onChairClick?: (professionalId: string) => void;
 }
 
 // Person figure with name label
@@ -27,61 +24,25 @@ function PersonFigure({ name }: { name?: string }) {
   );
 }
 
-// Barber Pole SVG component
-function BarberPole() {
-  return (
-    <div className="relative w-3 h-20 overflow-hidden">
-      {/* Pole top cap */}
-      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-muted-foreground rounded-t-full" />
-      {/* Pole bottom cap */}
-      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-muted-foreground rounded-b-full" />
-      {/* Pole body with stripes */}
-      <div className="absolute inset-0 bg-foreground/90 overflow-hidden">
-        <div className="absolute inset-0 animate-[barber-pole_2s_linear_infinite]">
-          {[...Array(16)].map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "h-2.5 w-full",
-                i % 3 === 0 && "bg-[hsl(0,84%,60%)]",
-                i % 3 === 1 && "bg-foreground",
-                i % 3 === 2 && "bg-[hsl(217,91%,60%)]"
-              )}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // Barber chair with optional client
-function BarberChair({ 
+function BarberChairPublic({ 
   hasClient, 
   color, 
   clientName,
-  isOccupied,
-  isAdmin,
-  onClick 
+  isOccupied 
 }: { 
   hasClient: boolean; 
   color: string;
   clientName?: string;
   isOccupied: boolean;
-  isAdmin?: boolean;
-  onClick?: () => void;
 }) {
-  const dimmed = !isAdmin && isOccupied;
+  const dimmed = isOccupied;
   
   return (
-    <div 
-      className={cn(
-        "relative flex flex-col items-center transition-all",
-        isAdmin && "cursor-pointer hover:scale-105",
-        dimmed && "opacity-40"
-      )}
-      onClick={onClick}
-    >
+    <div className={cn(
+      "relative flex flex-col items-center transition-all",
+      dimmed && !hasClient && "opacity-40"
+    )}>
       {/* Client on chair */}
       {hasClient && (
         <div className="absolute -top-14 z-10">
@@ -110,24 +71,12 @@ function BarberChair({
 
 // Barber Station Component
 function BarberStation({ 
-  professional,
-  isAdmin,
-  pendingAction,
-  onChairClick 
+  professional
 }: { 
   professional: Professional;
-  isAdmin?: boolean;
-  pendingAction?: "add" | "remove" | null;
-  onChairClick?: (professionalId: string) => void;
 }) {
   const hasClient = professional.clients_queue > 0;
   const isOccupied = hasClient;
-
-  const handleClick = () => {
-    if (isAdmin && pendingAction && onChairClick) {
-      onChairClick(professional.id);
-    }
-  };
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -136,51 +85,26 @@ function BarberStation({
         {professional.name}
       </span>
 
-      {/* Station layout */}
-      <div className="relative flex items-end gap-1.5">
-        {/* Barber pole left */}
-        <BarberPole />
-        
-        {/* Chair with client */}
-        <BarberChair 
-          hasClient={hasClient} 
-          color={professional.color}
-          clientName={hasClient ? professional.name : undefined}
-          isOccupied={isOccupied}
-          isAdmin={isAdmin}
-          onClick={handleClick}
-        />
-        
-        {/* Barber pole right */}
-        <BarberPole />
-      </div>
+      {/* Chair with client */}
+      <BarberChairPublic 
+        hasClient={hasClient} 
+        color={professional.color}
+        clientName={hasClient ? professional.name : undefined}
+        isOccupied={isOccupied}
+      />
 
-      {/* Status label (public view only) */}
-      {!isAdmin && (
-        <span className={cn(
-          "text-xs font-medium uppercase tracking-wider",
-          isOccupied ? "text-destructive" : "text-status-green"
-        )}>
-          {isOccupied ? "Ocupado" : "Disponível"}
-        </span>
-      )}
-
-      {/* Click hint for admin when pending action */}
-      {isAdmin && pendingAction && (
-        <span className="text-xs text-primary animate-pulse">
-          Clique para {pendingAction === "add" ? "adicionar" : "remover"}
-        </span>
-      )}
+      {/* Status label */}
+      <span className={cn(
+        "text-xs font-medium uppercase tracking-wider",
+        isOccupied ? "text-destructive" : "text-status-green"
+      )}>
+        {isOccupied ? "Ocupado" : "Disponível"}
+      </span>
     </div>
   );
 }
 
-export function BarbershopScene({ 
-  queueCount, 
-  isAdmin = false,
-  pendingAction,
-  onChairClick 
-}: BarbershopSceneProps) {
+export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
   const { professionals, loading } = useProfessionals();
 
   if (loading) {
@@ -206,13 +130,6 @@ export function BarbershopScene({
 
   return (
     <div className="w-full">
-      <style>{`
-        @keyframes barber-pole {
-          from { transform: translateY(-20px); }
-          to { transform: translateY(0px); }
-        }
-      `}</style>
-
       <div className="relative bg-card rounded-2xl p-6 border border-border overflow-hidden">
         {/* Barber stations */}
         <div
@@ -225,9 +142,6 @@ export function BarbershopScene({
             <BarberStation 
               key={professional.id} 
               professional={professional}
-              isAdmin={isAdmin}
-              pendingAction={pendingAction}
-              onChairClick={onChairClick}
             />
           ))}
         </div>
