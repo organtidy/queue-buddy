@@ -48,12 +48,12 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
   const waitTimeFormatted = formatWaitTime(totalWaitTime);
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-6">
       {/* Main circle */}
       <div
         className={cn(
           "relative flex items-center justify-center rounded-full transition-all duration-500",
-          "w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80",
+          "w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64",
           "border-4",
           status === "green" && "border-status-green bg-status-green/10",
           status === "yellow" && "border-status-yellow bg-status-yellow/10",
@@ -70,23 +70,28 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
           )}
         />
         
-        {/* Count number */}
-        <span
-          className={cn(
-            "relative text-7xl sm:text-8xl md:text-9xl font-bold",
-            status === "green" && "text-status-green",
-            status === "yellow" && "text-status-yellow",
-            status === "red" && "text-status-red"
-          )}
-        >
-          {count}
-        </span>
+        {/* Count number and people text - side by side */}
+        <div className="relative flex items-baseline gap-2">
+          <span
+            className={cn(
+              "text-6xl sm:text-7xl md:text-8xl font-bold",
+              status === "green" && "text-status-green",
+              status === "yellow" && "text-status-yellow",
+              status === "red" && "text-status-red"
+            )}
+          >
+            {count}
+          </span>
+          <span className="text-muted-foreground text-sm sm:text-base">
+            {count === 1 ? "pessoa" : "pessoas"}
+          </span>
+        </div>
       </div>
 
       {/* Status message */}
       <div
         className={cn(
-          "text-xl sm:text-2xl font-semibold text-center px-4",
+          "text-lg sm:text-xl font-semibold text-center px-4",
           status === "green" && "text-status-green",
           status === "yellow" && "text-status-yellow",
           status === "red" && "text-status-red"
@@ -95,16 +100,13 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
         {message}
       </div>
 
-      {/* Wait time and people count - closer together */}
+      {/* Wait time - modern font styling */}
       <div className="text-center space-y-1">
-        <p className="text-muted-foreground text-sm uppercase tracking-wider">
+        <p className="text-muted-foreground text-xs uppercase tracking-[0.2em] font-light">
           Tempo estimado de espera
         </p>
-        <p className="text-foreground text-2xl sm:text-3xl font-bold">
+        <p className="text-foreground text-xl sm:text-2xl font-semibold tracking-tight">
           {waitTimeFormatted}
-        </p>
-        <p className="text-muted-foreground text-base">
-          {count === 1 ? "pessoa na fila" : "pessoas na fila"}
         </p>
       </div>
     </div>

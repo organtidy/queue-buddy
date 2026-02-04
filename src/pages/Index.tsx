@@ -44,8 +44,8 @@ const Index = () => {
       <header className="flex items-center justify-between p-4 sm:p-6">
         <div className="flex items-center gap-3">
           <Scissors className="w-8 h-8 text-primary" />
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-            Filômetro <span className="text-primary">Ásperus</span>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
+            Filômetro <span className="text-primary font-bold">Ásperus</span>
           </h1>
         </div>
         <div className="flex items-center gap-2">
