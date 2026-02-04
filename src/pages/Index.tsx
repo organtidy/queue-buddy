@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
 import { QueueIndicator } from "@/components/QueueIndicator";
-import { BarbershopAnimation } from "@/components/BarbershopAnimation";
+import { BarbershopScene } from "@/components/BarbershopScene";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -74,8 +74,8 @@ const Index = () => {
           avgWaitTime={queueState.avg_wait_time}
         />
         
-        {/* Barbershop animation */}
-        <BarbershopAnimation count={queueState.current_count} />
+        {/* Barbershop scene with professionals */}
+        <BarbershopScene queueCount={queueState.current_count} />
       </main>
 
       {/* Footer */}
