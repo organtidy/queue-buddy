@@ -12,6 +12,15 @@ export interface Professional {
   created_at: string;
 }
 
+export interface CutDuration {
+  duration: number;
+  timestamp: string;
+}
+
+const MIN_CUT_DURATION = 5; // minutes
+const MAX_CUT_DURATION = 120; // minutes
+const MAX_STORED_CUTS = 10;
+
 export function useProfessionals() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,18 +91,55 @@ export function useProfessionals() {
     const professional = professionals.find((p) => p.id === professionalId);
     if (!professional) return;
 
-    await updateProfessional(professionalId, { 
-      clients_queue: professional.clients_queue + 1 
-    });
+    const newCount = professional.clients_queue + 1;
+    
+    // If this is the first client, set the start time
+    const updates: Partial<Professional> = { 
+      clients_queue: newCount 
+    };
+    
+    if (professional.clients_queue === 0) {
+      updates.current_client_time = new Date().toISOString();
+    }
+
+    await updateProfessional(professionalId, updates);
   };
 
-  const removeClientFromProfessional = async (professionalId: string) => {
+  const removeClientFromProfessional = async (professionalId: string): Promise<number | null> => {
     const professional = professionals.find((p) => p.id === professionalId);
-    if (!professional || professional.clients_queue <= 0) return;
+    if (!professional || professional.clients_queue <= 0) return null;
 
-    await updateProfessional(professionalId, { 
-      clients_queue: professional.clients_queue - 1 
-    });
+    let cutDuration: number | null = null;
+
+    // Calculate cut duration if we have a start time
+    if (professional.current_client_time) {
+      const startTime = new Date(professional.current_client_time);
+      const now = new Date();
+      const durationMinutes = Math.round((now.getTime() - startTime.getTime()) / 60000);
+      
+      // Only return valid durations (between 5 and 120 minutes)
+      if (durationMinutes >= MIN_CUT_DURATION && durationMinutes <= MAX_CUT_DURATION) {
+        cutDuration = durationMinutes;
+      }
+    }
+
+    const newCount = professional.clients_queue - 1;
+    
+    const updates: Partial<Professional> = { 
+      clients_queue: newCount 
+    };
+    
+    // If there are still clients, reset the timer for next client
+    // If no more clients, clear the timer
+    if (newCount > 0) {
+      updates.current_client_time = new Date().toISOString();
+    } else {
+      updates.current_client_time = null;
+    }
+
+    await updateProfessional(professionalId, updates);
+    
+    return cutDuration;
   };
 
   const addClientToQueue = async (professionalId: string, time: string) => {
@@ -129,5 +175,8 @@ export function useProfessionals() {
     addClientToQueue,
     removeClientFromQueue,
     setCurrentClient,
+    MIN_CUT_DURATION,
+    MAX_CUT_DURATION,
+    MAX_STORED_CUTS,
   };
 }

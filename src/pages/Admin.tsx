@@ -24,6 +24,7 @@ export default function Admin() {
     setAvgWaitTime,
     setManualWaitTime,
     setMessages,
+    addCutDuration,
   } = useQueueState();
 
   const { professionals, updateProfessional } = useProfessionals();
@@ -55,10 +56,14 @@ export default function Admin() {
     // Reset count
     await resetCount();
     
-    // Reset all professionals' clients_queue to 0
+    // Reset all professionals' clients_queue to 0 and clear timers
     for (const professional of professionals) {
-      await updateProfessional(professional.id, { clients_queue: 0 });
+      await updateProfessional(professional.id, { clients_queue: 0, current_client_time: null });
     }
+  };
+
+  const handleCutComplete = async (duration: number) => {
+    await addCutDuration(duration);
   };
 
   if (loading) {
@@ -97,6 +102,7 @@ export default function Admin() {
         onIncrement={incrementCount}
         onDecrement={decrementCount}
         onReset={() => handleQueueAction(handleResetQueue, "Fila zerada")}
+        onCutComplete={handleCutComplete}
       />
 
       <SettingsCard
