@@ -15,45 +15,37 @@ interface QueueControlCardProps {
   onCutComplete?: (duration: number) => Promise<void>;
 }
 
-// Chair SVG - same style as public page
+// Chair SVG - larger high-quality style matching public page (no client figures)
 const ChairIcon = ({ 
   color, 
-  hasClient, 
   isSelected,
   onClick 
 }: { 
   color: string; 
-  hasClient: boolean;
   isSelected?: boolean;
   onClick?: () => void;
 }) => {
   return (
     <div 
       className={cn(
-        "relative flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-lg",
+        "relative flex flex-col items-center cursor-pointer transition-all duration-200 p-3 rounded-lg",
         isSelected && "ring-2 ring-primary ring-offset-2 bg-accent/20",
         onClick && "hover:scale-105 active:scale-95"
       )}
       onClick={onClick}
     >
-      {/* Client indicator (person icon) */}
-      {hasClient && (
-        <div className="absolute -top-10 flex flex-col items-center animate-pulse">
-          <div className="w-5 h-5 rounded-full bg-primary" />
-          <div className="w-6 h-7 rounded-t-lg bg-primary -mt-0.5" />
-        </div>
-      )}
-      {/* Chair - larger and higher quality */}
+      {/* Chair back - larger */}
       <div 
-        className="w-14 h-10 rounded-t-xl border-3"
+        className="w-20 h-14 rounded-t-2xl border-4"
         style={{ 
           backgroundColor: color, 
           borderColor: `color-mix(in srgb, ${color} 60%, black)`,
-          boxShadow: `inset 0 -2px 4px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.15)`
+          boxShadow: `inset 0 -3px 6px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15)`
         }}
       />
+      {/* Seat */}
       <div 
-        className="w-16 h-3 border-2 border-t-0 rounded-b-sm"
+        className="w-24 h-4 border-3 border-t-0 rounded-b-md"
         style={{ 
           backgroundColor: color, 
           borderColor: `color-mix(in srgb, ${color} 60%, black)` 
@@ -61,16 +53,17 @@ const ChairIcon = ({
       />
       {/* Arm rests */}
       <div 
-        className="absolute top-5 -left-0.5 w-2 h-4 rounded-l-md"
+        className="absolute top-8 -left-1 w-3 h-6 rounded-l-lg"
         style={{ backgroundColor: `color-mix(in srgb, ${color} 70%, black)` }}
       />
       <div 
-        className="absolute top-5 -right-0.5 w-2 h-4 rounded-r-md"
+        className="absolute top-8 -right-1 w-3 h-6 rounded-r-lg"
         style={{ backgroundColor: `color-mix(in srgb, ${color} 70%, black)` }}
       />
+      {/* Base pole */}
+      <div className="w-4 h-6 bg-muted-foreground rounded-sm" />
       {/* Base */}
-      <div className="w-3 h-4 bg-muted-foreground rounded-sm" />
-      <div className="w-8 h-1.5 bg-muted-foreground rounded-full" />
+      <div className="w-12 h-2 bg-muted-foreground rounded-full" />
     </div>
   );
 };
@@ -158,21 +151,20 @@ export function QueueControlCard({
         <div className="flex items-center justify-between gap-2 mb-6">
           {/* João (left) */}
           {joao && (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1">
               <span 
-                className="text-sm font-semibold"
+                className="text-base font-bold"
                 style={{ color: joao.color }}
               >
                 {joao.name}
               </span>
               <ChairIcon 
                 color={joao.color} 
-                hasClient={joao.clients_queue > 0}
                 isSelected={pendingAction !== null}
                 onClick={() => handleChairClick(joao.id)}
               />
               {joao.clients_queue > 0 && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm font-medium text-muted-foreground">
                   {joao.clients_queue} cliente{joao.clients_queue > 1 ? "s" : ""}
                 </span>
               )}
@@ -188,21 +180,20 @@ export function QueueControlCard({
 
           {/* Jacson (right) */}
           {jacson && (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1">
               <span 
-                className="text-sm font-semibold"
+                className="text-base font-bold"
                 style={{ color: jacson.color }}
               >
                 {jacson.name}
               </span>
               <ChairIcon 
                 color={jacson.color} 
-                hasClient={jacson.clients_queue > 0}
                 isSelected={pendingAction !== null}
                 onClick={() => handleChairClick(jacson.id)}
               />
               {jacson.clients_queue > 0 && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm font-medium text-muted-foreground">
                   {jacson.clients_queue} cliente{jacson.clients_queue > 1 ? "s" : ""}
                 </span>
               )}
