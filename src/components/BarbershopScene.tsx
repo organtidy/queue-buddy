@@ -1,15 +1,24 @@
-import { useProfessionals } from "@/hooks/useProfessionals";
+import { useProfessionals, Professional } from "@/hooks/useProfessionals";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface BarbershopSceneProps {
   queueCount: number;
+  isAdmin?: boolean;
+  pendingAction?: "add" | "remove" | null;
+  onChairClick?: (professionalId: string) => void;
 }
 
-// Person figure for the waiting bench
-function WaitingPerson() {
+// Person figure with name label
+function PersonFigure({ name }: { name?: string }) {
   return (
     <div className="flex flex-col items-center">
+      {/* Name above head */}
+      {name && (
+        <span className="text-[10px] font-semibold text-primary mb-0.5 whitespace-nowrap">
+          {name}
+        </span>
+      )}
       {/* Head */}
       <div className="w-5 h-5 rounded-full bg-primary" />
       {/* Body */}
@@ -47,16 +56,36 @@ function BarberPole() {
 }
 
 // Barber chair with optional client
-function BarberChair({ hasClient, color }: { hasClient: boolean; color: string }) {
+function BarberChair({ 
+  hasClient, 
+  color, 
+  clientName,
+  isOccupied,
+  isAdmin,
+  onClick 
+}: { 
+  hasClient: boolean; 
+  color: string;
+  clientName?: string;
+  isOccupied: boolean;
+  isAdmin?: boolean;
+  onClick?: () => void;
+}) {
+  const dimmed = !isAdmin && isOccupied;
+  
   return (
-    <div className="relative flex flex-col items-center">
+    <div 
+      className={cn(
+        "relative flex flex-col items-center transition-all",
+        isAdmin && "cursor-pointer hover:scale-105",
+        dimmed && "opacity-40"
+      )}
+      onClick={onClick}
+    >
       {/* Client on chair */}
       {hasClient && (
-        <div className="absolute -top-10 z-10">
-          {/* Head */}
-          <div className="w-5 h-5 rounded-full bg-primary mx-auto" />
-          {/* Body */}
-          <div className="w-6 h-7 rounded-t-lg bg-primary -mt-0.5" />
+        <div className="absolute -top-14 z-10">
+          <PersonFigure name={clientName} />
         </div>
       )}
       {/* Chair back */}
@@ -81,19 +110,30 @@ function BarberChair({ hasClient, color }: { hasClient: boolean; color: string }
 
 // Barber Station Component
 function BarberStation({ 
-  name, 
-  color, 
-  clientsInChair 
+  professional,
+  isAdmin,
+  pendingAction,
+  onChairClick 
 }: { 
-  name: string; 
-  color: string; 
-  clientsInChair: number;
+  professional: Professional;
+  isAdmin?: boolean;
+  pendingAction?: "add" | "remove" | null;
+  onChairClick?: (professionalId: string) => void;
 }) {
+  const hasClient = professional.clients_queue > 0;
+  const isOccupied = hasClient;
+
+  const handleClick = () => {
+    if (isAdmin && pendingAction && onChairClick) {
+      onChairClick(professional.id);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Professional name */}
       <span className="text-sm font-semibold text-foreground tracking-wide">
-        {name}
+        {professional.name}
       </span>
 
       {/* Station layout */}
@@ -102,27 +142,45 @@ function BarberStation({
         <BarberPole />
         
         {/* Chair with client */}
-        <BarberChair hasClient={clientsInChair > 0} color={color} />
+        <BarberChair 
+          hasClient={hasClient} 
+          color={professional.color}
+          clientName={hasClient ? professional.name : undefined}
+          isOccupied={isOccupied}
+          isAdmin={isAdmin}
+          onClick={handleClick}
+        />
         
         {/* Barber pole right */}
         <BarberPole />
       </div>
 
-      {/* Action button */}
-      <button
-        className={cn(
-          "px-5 py-2 rounded-lg text-sm font-bold uppercase tracking-wide",
-          "transition-all hover:opacity-80 text-foreground"
-        )}
-        style={{ backgroundColor: color }}
-      >
-        {name}
-      </button>
+      {/* Status label (public view only) */}
+      {!isAdmin && (
+        <span className={cn(
+          "text-xs font-medium uppercase tracking-wider",
+          isOccupied ? "text-destructive" : "text-status-green"
+        )}>
+          {isOccupied ? "Ocupado" : "Disponível"}
+        </span>
+      )}
+
+      {/* Click hint for admin when pending action */}
+      {isAdmin && pendingAction && (
+        <span className="text-xs text-primary animate-pulse">
+          Clique para {pendingAction === "add" ? "adicionar" : "remover"}
+        </span>
+      )}
     </div>
   );
 }
 
-export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
+export function BarbershopScene({ 
+  queueCount, 
+  isAdmin = false,
+  pendingAction,
+  onChairClick 
+}: BarbershopSceneProps) {
   const { professionals, loading } = useProfessionals();
 
   if (loading) {
@@ -136,19 +194,15 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
     );
   }
 
-  // Distribute clients across professionals
-  const numProfessionals = professionals.length;
-  const clientsPerProfessional = numProfessionals > 0 
-    ? Math.floor(queueCount / numProfessionals) 
-    : 0;
-  const remainingClients = numProfessionals > 0 
-    ? queueCount % numProfessionals 
-    : 0;
-
-  // Calculate how many are in chairs vs waiting bench
-  const totalChairCapacity = numProfessionals; // 1 chair per professional
-  const clientsInChairs = Math.min(queueCount, totalChairCapacity);
-  const clientsOnBench = Math.max(0, queueCount - totalChairCapacity);
+  // Build waiting bench: for each professional with clients_queue > 1, 
+  // show (clients_queue - 1) people waiting with that professional's name
+  const waitingClients: { name: string; professionalId: string }[] = [];
+  professionals.forEach((p) => {
+    const waitingCount = Math.max(0, p.clients_queue - 1);
+    for (let i = 0; i < waitingCount; i++) {
+      waitingClients.push({ name: p.name, professionalId: p.id });
+    }
+  });
 
   return (
     <div className="w-full">
@@ -167,29 +221,26 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
             professionals.length > 3 && "flex-wrap"
           )}
         >
-          {professionals.map((professional, index) => {
-            // Distribute clients: first professionals get the extra ones
-            const hasClient = index < clientsInChairs;
-            return (
-              <BarberStation 
-                key={professional.id} 
-                name={professional.name}
-                color={professional.color}
-                clientsInChair={hasClient ? 1 : 0}
-              />
-            );
-          })}
+          {professionals.map((professional) => (
+            <BarberStation 
+              key={professional.id} 
+              professional={professional}
+              isAdmin={isAdmin}
+              pendingAction={pendingAction}
+              onChairClick={onChairClick}
+            />
+          ))}
         </div>
 
         {/* Waiting bench - only show if there are clients waiting beyond chair capacity */}
-        {clientsOnBench > 0 && (
+        {waitingClients.length > 0 && (
           <div className="border-t border-border pt-4 mt-6">
             <p className="text-center text-xs text-muted-foreground mb-3 uppercase tracking-wider">
               Banco de espera
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
-              {Array.from({ length: Math.min(clientsOnBench, 10) }).map((_, idx) => (
-                <WaitingPerson key={idx} />
+              {waitingClients.slice(0, 10).map((client, idx) => (
+                <PersonFigure key={idx} name={client.name} />
               ))}
             </div>
           </div>

@@ -49,7 +49,7 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      {/* Main circle */}
+      {/* Main circle - number only */}
       <div
         className={cn(
           "relative flex items-center justify-center rounded-full transition-all duration-500",
@@ -70,23 +70,23 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
           )}
         />
         
-        {/* Count number and people text - side by side */}
-        <div className="relative flex items-baseline gap-2">
-          <span
-            className={cn(
-              "text-6xl sm:text-7xl md:text-8xl font-bold",
-              status === "green" && "text-status-green",
-              status === "yellow" && "text-status-yellow",
-              status === "red" && "text-status-red"
-            )}
-          >
-            {count}
-          </span>
-          <span className="text-muted-foreground text-sm sm:text-base">
-            {count === 1 ? "pessoa" : "pessoas"}
-          </span>
-        </div>
+        {/* Count number only */}
+        <span
+          className={cn(
+            "relative text-7xl sm:text-8xl md:text-9xl font-bold",
+            status === "green" && "text-status-green",
+            status === "yellow" && "text-status-yellow",
+            status === "red" && "text-status-red"
+          )}
+        >
+          {count}
+        </span>
       </div>
+
+      {/* People count label - outside circle */}
+      <p className="text-muted-foreground text-sm sm:text-base">
+        {count === 1 ? "pessoa na fila" : "pessoas na fila"}
+      </p>
 
       {/* Status message */}
       <div

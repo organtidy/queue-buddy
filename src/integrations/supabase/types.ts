@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       professionals: {
         Row: {
+          clients_queue: number | null
           color: string
           created_at: string
           current_client_time: string | null
@@ -25,6 +26,7 @@ export type Database = {
           next_clients: Json | null
         }
         Insert: {
+          clients_queue?: number | null
           color?: string
           created_at?: string
           current_client_time?: string | null
@@ -34,6 +36,7 @@ export type Database = {
           next_clients?: Json | null
         }
         Update: {
+          clients_queue?: number | null
           color?: string
           created_at?: string
           current_client_time?: string | null
@@ -46,6 +49,7 @@ export type Database = {
       }
       queue_state: {
         Row: {
+          admin_pin: string | null
           avg_wait_time: number
           current_count: number
           id: string
@@ -55,8 +59,10 @@ export type Database = {
           message_green: string | null
           message_red: string | null
           message_yellow: string | null
+          secret_phrase: string | null
         }
         Insert: {
+          admin_pin?: string | null
           avg_wait_time?: number
           current_count?: number
           id?: string
@@ -66,8 +72,10 @@ export type Database = {
           message_green?: string | null
           message_red?: string | null
           message_yellow?: string | null
+          secret_phrase?: string | null
         }
         Update: {
+          admin_pin?: string | null
           avg_wait_time?: number
           current_count?: number
           id?: string
@@ -77,6 +85,7 @@ export type Database = {
           message_green?: string | null
           message_red?: string | null
           message_yellow?: string | null
+          secret_phrase?: string | null
         }
         Relationships: []
       }
