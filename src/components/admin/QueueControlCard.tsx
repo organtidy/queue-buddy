@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { Plus, Minus, RotateCcw } from "lucide-react";
 import { useProfessionals } from "@/hooks/useProfessionals";
 import { toast } from "@/hooks/use-toast";
-import { ChairButton } from "./ChairButton";
+import { cn } from "@/lib/utils";
 
 interface QueueControlCardProps {
   currentCount: number;
@@ -12,6 +12,36 @@ interface QueueControlCardProps {
   onDecrement: () => Promise<void>;
   onReset: () => void;
   onCutComplete?: (duration: number) => Promise<void>;
+}
+
+// Chair SVG component - same style as public page
+function ChairIcon({ color, hasClient }: { color: string; hasClient: boolean }) {
+  return (
+    <div className="relative flex flex-col items-center">
+      {/* Client indicator (person icon) */}
+      {hasClient && (
+        <div className="absolute -top-8 flex flex-col items-center">
+          <div className="w-4 h-4 rounded-full bg-primary" />
+          <div className="w-5 h-6 rounded-t-lg bg-primary -mt-0.5" />
+        </div>
+      )}
+      {/* Chair */}
+      <div 
+        className="w-10 h-7 rounded-t-lg border-2"
+        style={{ backgroundColor: color, borderColor: `color-mix(in srgb, ${color} 70%, black)` }}
+      />
+      <div 
+        className="w-12 h-2.5 border-2 border-t-0"
+        style={{ backgroundColor: color, borderColor: `color-mix(in srgb, ${color} 70%, black)` }}
+      />
+      {/* Arm rests */}
+      <div className="absolute top-4 -left-1 w-1.5 h-3 bg-muted-foreground rounded-l" />
+      <div className="absolute top-4 -right-1 w-1.5 h-3 bg-muted-foreground rounded-r" />
+      {/* Base */}
+      <div className="w-2 h-3 bg-muted-foreground" />
+      <div className="w-6 h-1 bg-muted-foreground rounded-full" />
+    </div>
+  );
 }
 
 export function QueueControlCard({
@@ -78,21 +108,27 @@ export function QueueControlCard({
         <CardTitle className="text-center">Pessoas na Fila</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Main layout: João - Number - Jacson */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+        {/* Main layout: João chair - Number - Jacson chair */}
+        <div className="flex items-center justify-between gap-2 mb-6">
           {/* João (left) */}
-          {joao ? (
-            <ChairButton
-              professionalName={joao.name}
-              professionalColor={joao.color}
-              clientsQueue={joao.clients_queue}
-              onAdd={() => handleAdd(joao.id)}
-              onRemove={() => handleRemove(joao.id)}
-              disabled={!isOpen}
-              position="left"
-            />
-          ) : (
-            <div className="w-16" /> // Placeholder if not found
+          {joao && (
+            <div className="flex flex-col items-center gap-2">
+              <span 
+                className="text-sm font-semibold"
+                style={{ color: joao.color }}
+              >
+                {joao.name}
+              </span>
+              <ChairIcon 
+                color={joao.color} 
+                hasClient={joao.clients_queue > 0}
+              />
+              {joao.clients_queue > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {joao.clients_queue} cliente{joao.clients_queue > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
           )}
 
           {/* Queue count in the center */}
@@ -103,19 +139,70 @@ export function QueueControlCard({
           </div>
 
           {/* Jacson (right) */}
-          {jacson ? (
-            <ChairButton
-              professionalName={jacson.name}
-              professionalColor={jacson.color}
-              clientsQueue={jacson.clients_queue}
-              onAdd={() => handleAdd(jacson.id)}
-              onRemove={() => handleRemove(jacson.id)}
-              disabled={!isOpen}
-              position="right"
-            />
-          ) : (
-            <div className="w-16" /> // Placeholder if not found
+          {jacson && (
+            <div className="flex flex-col items-center gap-2">
+              <span 
+                className="text-sm font-semibold"
+                style={{ color: jacson.color }}
+              >
+                {jacson.name}
+              </span>
+              <ChairIcon 
+                color={jacson.color} 
+                hasClient={jacson.clients_queue > 0}
+              />
+              {jacson.clients_queue > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {jacson.clients_queue} cliente{jacson.clients_queue > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
           )}
+        </div>
+
+        {/* Original large + and - buttons */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <Button
+            size="lg"
+            className="h-20 text-4xl font-bold"
+            onClick={() => joao && handleAdd(joao.id)}
+            disabled={!isOpen || !joao}
+          >
+            <Plus className="w-10 h-10 mr-1" />
+            João
+          </Button>
+          <Button
+            size="lg"
+            className="h-20 text-4xl font-bold"
+            onClick={() => jacson && handleAdd(jacson.id)}
+            disabled={!isOpen || !jacson}
+          >
+            <Plus className="w-10 h-10 mr-1" />
+            Jacson
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <Button
+            size="lg"
+            variant="secondary"
+            className="h-16 text-2xl font-bold"
+            onClick={() => joao && handleRemove(joao.id)}
+            disabled={!isOpen || !joao || (joao?.clients_queue ?? 0) === 0}
+          >
+            <Minus className="w-8 h-8 mr-1" />
+            João
+          </Button>
+          <Button
+            size="lg"
+            variant="secondary"
+            className="h-16 text-2xl font-bold"
+            onClick={() => jacson && handleRemove(jacson.id)}
+            disabled={!isOpen || !jacson || (jacson?.clients_queue ?? 0) === 0}
+          >
+            <Minus className="w-8 h-8 mr-1" />
+            Jacson
+          </Button>
         </div>
 
         {/* Reset button */}
