@@ -101,7 +101,7 @@ export default function Admin() {
         isOpen={queueState.is_open}
         onIncrement={incrementCount}
         onDecrement={decrementCount}
-        onReset={() => handleQueueAction(handleResetQueue, "Fila zerada")}
+        onReset={() => handleAction(handleResetQueue, "Fila zerada")}
         onCutComplete={handleCutComplete}
       />
 
