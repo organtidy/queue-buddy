@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { useQueueState } from "@/hooks/useQueueState";
+import { useProfessionals } from "@/hooks/useProfessionals";
 import { Scissors } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { LoginForm } from "@/components/admin/LoginForm";
@@ -8,10 +8,10 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StoreStatusCard } from "@/components/admin/StoreStatusCard";
 import { QueueControlCard } from "@/components/admin/QueueControlCard";
 import { SettingsCard } from "@/components/admin/SettingsCard";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [showClosedTooltip, setShowClosedTooltip] = useState(false);
 
   const {
@@ -26,20 +26,7 @@ export default function Admin() {
     setMessages,
   } = useQueueState();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-      setIsLoading(false);
-    };
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { professionals, updateProfessional } = useProfessionals();
 
   const handleAction = async (action: () => Promise<void>, successMessage: string) => {
     try {
@@ -64,7 +51,17 @@ export default function Admin() {
     await handleAction(action, successMessage);
   };
 
-  if (isLoading || loading) {
+  const handleResetQueue = async () => {
+    // Reset count
+    await resetCount();
+    
+    // Reset all professionals' clients_queue to 0
+    for (const professional of professionals) {
+      await updateProfessional(professional.id, { clients_queue: 0 });
+    }
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Scissors className="w-12 h-12 text-primary animate-pulse" />
@@ -97,9 +94,9 @@ export default function Admin() {
       <QueueControlCard
         currentCount={queueState.current_count}
         isOpen={queueState.is_open}
-        onIncrement={() => handleQueueAction(incrementCount, "Cliente adicionado")}
-        onDecrement={() => handleQueueAction(decrementCount, "Cliente removido")}
-        onReset={() => handleQueueAction(resetCount, "Fila zerada")}
+        onIncrement={incrementCount}
+        onDecrement={decrementCount}
+        onReset={() => handleQueueAction(handleResetQueue, "Fila zerada")}
       />
 
       <SettingsCard

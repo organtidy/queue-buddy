@@ -11,6 +11,8 @@ export interface QueueState {
   message_green: string | null;
   message_yellow: string | null;
   message_red: string | null;
+  admin_pin: string | null;
+  secret_phrase: string | null;
 }
 
 export function useQueueState() {
@@ -110,6 +112,34 @@ export function useQueueState() {
     });
   };
 
+  const validatePin = async (pin: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from("queue_state")
+      .select("admin_pin")
+      .maybeSingle();
+
+    if (error || !data) return false;
+    return data.admin_pin === pin;
+  };
+
+  const validateSecretPhrase = async (phrase: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from("queue_state")
+      .select("secret_phrase")
+      .maybeSingle();
+
+    if (error || !data) return false;
+    return data.secret_phrase?.toLowerCase() === phrase.toLowerCase();
+  };
+
+  const updatePin = async (newPin: string) => {
+    await updateQueueState({ admin_pin: newPin });
+  };
+
+  const updateSecretPhrase = async (newPhrase: string) => {
+    await updateQueueState({ secret_phrase: newPhrase });
+  };
+
   return {
     queueState,
     loading,
@@ -121,5 +151,9 @@ export function useQueueState() {
     setAvgWaitTime,
     setManualWaitTime,
     setMessages,
+    validatePin,
+    validateSecretPhrase,
+    updatePin,
+    updateSecretPhrase,
   };
 }

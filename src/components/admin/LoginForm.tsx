@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,123 +6,196 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scissors, Home, KeyRound } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { useQueueState } from "@/hooks/useQueueState";
 
 interface LoginFormProps {
   onSuccess: () => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetSent, setResetSent] = useState(false);
+  const [showForgotPin, setShowForgotPin] = useState(false);
+  const [secretPhrase, setSecretPhrase] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [phraseVerified, setPhraseVerified] = useState(false);
+
+  const { validatePin, validateSecretPhrase, updatePin } = useQueueState();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const isValid = await validatePin(pin);
 
-    if (error) {
-      toast({
-        title: "Erro de login",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou senha incorretos" 
-          : error.message,
-        variant: "destructive",
-      });
-    } else {
+    if (isValid) {
       toast({
         title: "Login realizado",
         description: "Bem-vindo de volta!",
       });
       onSuccess();
+    } else {
+      toast({
+        title: "PIN incorreto",
+        description: "Verifique o PIN e tente novamente",
+        variant: "destructive",
+      });
     }
 
     setIsLoading(false);
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleVerifyPhrase = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const redirectUrl = `${window.location.origin}/admin`;
+    const isValid = await validateSecretPhrase(secretPhrase);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: redirectUrl,
-    });
-
-    if (error) {
+    if (isValid) {
+      setPhraseVerified(true);
       toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
+        title: "Frase verificada!",
+        description: "Agora você pode definir um novo PIN.",
       });
     } else {
-      setResetSent(true);
       toast({
-        title: "Email enviado!",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+        title: "Frase incorreta",
+        description: "A frase secreta não confere",
+        variant: "destructive",
       });
     }
 
     setIsLoading(false);
   };
 
-  if (showForgotPassword) {
+  const handleResetPin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPin.length !== 4) {
+      toast({
+        title: "PIN inválido",
+        description: "O PIN deve ter 4 dígitos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPin !== confirmPin) {
+      toast({
+        title: "PINs não conferem",
+        description: "Os PINs digitados são diferentes",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await updatePin(newPin);
+      toast({
+        title: "PIN atualizado!",
+        description: "Seu novo PIN foi salvo com sucesso.",
+      });
+      // Reset state and go back to login
+      setShowForgotPin(false);
+      setPhraseVerified(false);
+      setSecretPhrase("");
+      setNewPin("");
+      setConfirmPin("");
+    } catch {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o PIN",
+        variant: "destructive",
+      });
+    }
+
+    setIsLoading(false);
+  };
+
+  if (showForgotPin) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
             <KeyRound className="w-12 h-12 text-primary mx-auto mb-2" />
-            <CardTitle>Redefinir Senha</CardTitle>
+            <CardTitle>Redefinir PIN</CardTitle>
           </CardHeader>
           <CardContent>
-            {resetSent ? (
-              <div className="text-center space-y-4">
-                <p className="text-muted-foreground">
-                  Um email foi enviado para <strong>{resetEmail}</strong> com instruções para redefinir sua senha.
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setShowForgotPassword(false);
-                    setResetSent(false);
-                    setResetEmail("");
-                  }}
-                >
-                  Voltar ao login
-                </Button>
-              </div>
-            ) : (
-              <form onSubmit={handleForgotPassword} className="space-y-4">
+            {!phraseVerified ? (
+              <form onSubmit={handleVerifyPhrase} className="space-y-4">
                 <div>
-                  <Label htmlFor="resetEmail">Email do barbeiro</Label>
+                  <Label htmlFor="secretPhrase">Frase secreta</Label>
                   <Input
-                    id="resetEmail"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
+                    id="secretPhrase"
+                    type="text"
+                    placeholder="Digite sua frase secreta"
+                    value={secretPhrase}
+                    onChange={(e) => setSecretPhrase(e.target.value)}
                     required
                   />
                 </div>
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                  {isLoading ? "Enviando..." : "Enviar link de redefinição"}
+                  {isLoading ? "Verificando..." : "Verificar frase"}
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   className="w-full"
-                  onClick={() => setShowForgotPassword(false)}
+                  onClick={() => {
+                    setShowForgotPin(false);
+                    setSecretPhrase("");
+                  }}
                 >
                   Voltar ao login
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPin} className="space-y-4">
+                <div>
+                  <Label htmlFor="newPin">Novo PIN (4 dígitos)</Label>
+                  <Input
+                    id="newPin"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="••••"
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPin">Confirmar novo PIN</Label>
+                  <Input
+                    id="confirmPin"
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="••••"
+                    value={confirmPin}
+                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                  {isLoading ? "Salvando..." : "Salvar novo PIN"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setShowForgotPin(false);
+                    setPhraseVerified(false);
+                    setSecretPhrase("");
+                    setNewPin("");
+                    setConfirmPin("");
+                  }}
+                >
+                  Cancelar
                 </Button>
               </form>
             )}
@@ -143,38 +215,30 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="pin">PIN (4 dígitos)</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
+                id="pin"
                 type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="••••"
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                 required
+                className="text-center text-2xl tracking-[0.5em]"
               />
             </div>
-            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            <Button type="submit" className="w-full" size="lg" disabled={isLoading || pin.length !== 4}>
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
           
           <button
             type="button"
-            onClick={() => setShowForgotPassword(true)}
+            onClick={() => setShowForgotPin(true)}
             className="w-full text-center text-sm text-muted-foreground hover:text-foreground mt-4 transition-colors"
           >
-            Esqueci minha senha
+            Esqueci meu PIN
           </button>
 
           <Link

@@ -8,6 +8,7 @@ export interface Professional {
   is_active: boolean;
   current_client_time: string | null;
   next_clients: string[];
+  clients_queue: number;
   created_at: string;
 }
 
@@ -33,6 +34,7 @@ export function useProfessionals() {
             next_clients: Array.isArray(p.next_clients) 
               ? (p.next_clients as string[]) 
               : [],
+            clients_queue: p.clients_queue ?? 0,
           }))
         );
       }
@@ -76,6 +78,24 @@ export function useProfessionals() {
     }
   };
 
+  const addClientToProfessional = async (professionalId: string) => {
+    const professional = professionals.find((p) => p.id === professionalId);
+    if (!professional) return;
+
+    await updateProfessional(professionalId, { 
+      clients_queue: professional.clients_queue + 1 
+    });
+  };
+
+  const removeClientFromProfessional = async (professionalId: string) => {
+    const professional = professionals.find((p) => p.id === professionalId);
+    if (!professional || professional.clients_queue <= 0) return;
+
+    await updateProfessional(professionalId, { 
+      clients_queue: professional.clients_queue - 1 
+    });
+  };
+
   const addClientToQueue = async (professionalId: string, time: string) => {
     const professional = professionals.find((p) => p.id === professionalId);
     if (!professional) return;
@@ -104,6 +124,8 @@ export function useProfessionals() {
     loading,
     error,
     updateProfessional,
+    addClientToProfessional,
+    removeClientFromProfessional,
     addClientToQueue,
     removeClientFromQueue,
     setCurrentClient,
