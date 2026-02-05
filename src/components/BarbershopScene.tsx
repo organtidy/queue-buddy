@@ -6,38 +6,49 @@ interface BarbershopSceneProps {
   queueCount: number;
 }
 
-// Barber figure (standing behind chair, with apron)
-function BarberFigure({ name, color }: { name: string; color: string }) {
+// Barber figure with proper apron (matching reference image)
+function BarberFigure({ color }: { color: string }) {
   return (
     <div className="flex flex-col items-center">
       {/* Head */}
       <div 
-        className="w-6 h-6 rounded-full"
+        className="w-7 h-7 rounded-full"
         style={{ backgroundColor: color }}
       />
-      {/* Body with apron */}
-      <div className="relative -mt-0.5">
-        {/* Torso */}
+      {/* Arms spread out */}
+      <div className="relative -mt-1">
+        {/* Left arm */}
         <div 
-          className="w-8 h-10 rounded-t-lg"
+          className="absolute -left-3 top-1 w-3 h-8 rounded-full"
           style={{ backgroundColor: color }}
         />
-        {/* Apron */}
+        {/* Right arm */}
         <div 
-          className="absolute top-2 left-1 w-6 h-7 rounded-sm bg-muted"
+          className="absolute -right-3 top-1 w-3 h-8 rounded-full"
+          style={{ backgroundColor: color }}
+        />
+        {/* Torso */}
+        <div 
+          className="w-10 h-12 rounded-t-lg"
+          style={{ backgroundColor: color }}
+        />
+        {/* Apron - white/light overlay on torso */}
+        <div 
+          className="absolute top-3 left-1 right-1 bottom-0 rounded-b-sm"
           style={{ 
-            borderTop: `2px solid ${color}`,
+            backgroundColor: 'hsl(var(--muted))',
+            borderTop: `2px solid hsl(var(--muted-foreground) / 0.3)`,
           }}
         />
       </div>
       {/* Legs */}
       <div className="flex gap-1 -mt-0.5">
         <div 
-          className="w-3 h-6 rounded-b"
+          className="w-4 h-7 rounded-b"
           style={{ backgroundColor: color }}
         />
         <div 
-          className="w-3 h-6 rounded-b"
+          className="w-4 h-7 rounded-b"
           style={{ backgroundColor: color }}
         />
       </div>
@@ -51,43 +62,50 @@ function ClientFigure({ color }: { color: string }) {
     <div className="flex flex-col items-center">
       {/* Head */}
       <div 
-        className="w-5 h-5 rounded-full"
+        className="w-6 h-6 rounded-full"
         style={{ backgroundColor: color }}
       />
       {/* Body (seated) */}
       <div 
-        className="w-6 h-6 rounded-t-lg -mt-0.5"
+        className="w-7 h-7 rounded-t-lg -mt-0.5"
         style={{ backgroundColor: color }}
       />
     </div>
   );
 }
 
-// Waiting client figure (standing)
-function WaitingClientFigure({ professionalColor }: { professionalColor: string }) {
+// Waiting client figure (standing, with barber name)
+function WaitingClientFigure({ professionalColor, professionalName }: { professionalColor: string; professionalName: string }) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-1">
       {/* Head */}
       <div 
-        className="w-4 h-4 rounded-full"
+        className="w-5 h-5 rounded-full"
         style={{ backgroundColor: professionalColor }}
       />
       {/* Body */}
       <div 
-        className="w-5 h-7 rounded-t-lg -mt-0.5"
+        className="w-6 h-8 rounded-t-lg -mt-1"
         style={{ backgroundColor: professionalColor }}
       />
       {/* Legs */}
       <div className="flex gap-0.5 -mt-0.5">
         <div 
-          className="w-2 h-4 rounded-b"
+          className="w-2.5 h-5 rounded-b"
           style={{ backgroundColor: professionalColor }}
         />
         <div 
-          className="w-2 h-4 rounded-b"
+          className="w-2.5 h-5 rounded-b"
           style={{ backgroundColor: professionalColor }}
         />
       </div>
+      {/* Barber name */}
+      <span 
+        className="text-[10px] font-bold uppercase"
+        style={{ color: professionalColor }}
+      >
+        {professionalName}
+      </span>
     </div>
   );
 }
@@ -162,7 +180,7 @@ function BarberPole() {
   );
 }
 
-// Barber Station Component (pole + barber + chair + optional client)
+// Barber Station: pole - barber - chair - pole (2 poles per station)
 function BarberStation({ professional }: { professional: Professional }) {
   const hasClient = professional.clients_queue > 0;
 
@@ -176,31 +194,33 @@ function BarberStation({ professional }: { professional: Professional }) {
         {professional.name}
       </div>
 
-      {/* Station layout: pole - barber - chair */}
-      <div className="flex items-end gap-3">
-        {/* Barber pole */}
+      {/* Station layout: pole - barber - chair - pole */}
+      <div className="flex items-end gap-2">
+        {/* Left barber pole */}
         <BarberPole />
         
         {/* Barber figure */}
         <div className="mb-6">
-          <BarberFigure name={professional.name} color={professional.color} />
+          <BarberFigure color={professional.color} />
         </div>
 
         {/* Chair with optional client */}
         <div className="relative">
-          {/* Client on chair */}
           {hasClient && (
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10">
+            <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-10">
               <ClientFigure color={professional.color} />
             </div>
           )}
           <BarberChair color={professional.color} />
         </div>
+
+        {/* Right barber pole */}
+        <BarberPole />
       </div>
 
-      {/* Status label */}
+      {/* Status label - centered */}
       <span className={cn(
-        "text-xs font-medium uppercase tracking-wider",
+        "text-xs font-bold uppercase tracking-wider text-center w-full",
         hasClient ? "text-destructive" : "text-status-green"
       )}>
         {hasClient ? "Ocupado" : "Disponível"}
@@ -223,13 +243,12 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
     );
   }
 
-  // Build waiting list: for each professional with clients_queue > 1, 
-  // show (clients_queue - 1) people waiting
-  const waitingClients: { color: string; professionalId: string }[] = [];
+  // Build waiting list with professional info
+  const waitingClients: { color: string; name: string; professionalId: string }[] = [];
   professionals.forEach((p) => {
     const waitingCount = Math.max(0, p.clients_queue - 1);
     for (let i = 0; i < waitingCount; i++) {
-      waitingClients.push({ color: p.color, professionalId: p.id });
+      waitingClients.push({ color: p.color, name: p.name, professionalId: p.id });
     }
   });
 
@@ -254,7 +273,7 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
           ))}
         </div>
 
-        {/* Waiting bench - only show if there are clients waiting beyond chair capacity */}
+        {/* Waiting bench */}
         {waitingClients.length > 0 && (
           <div className="border-t border-border pt-4 mt-6">
             <p className="text-center text-xs text-muted-foreground mb-3 uppercase tracking-wider">
@@ -262,7 +281,11 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
               {waitingClients.slice(0, 10).map((client, idx) => (
-                <WaitingClientFigure key={idx} professionalColor={client.color} />
+                <WaitingClientFigure 
+                  key={idx} 
+                  professionalColor={client.color} 
+                  professionalName={client.name}
+                />
               ))}
             </div>
           </div>
