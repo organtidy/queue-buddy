@@ -99,6 +99,9 @@ export function useQueueState() {
   const updateQueueState = async (updates: Partial<Omit<QueueState, "id" | "last_updated">>) => {
     if (!queueState) return;
 
+    // Optimistic update - immediately reflect in UI
+    setQueueState(prev => prev ? { ...prev, ...updates, last_updated: new Date().toISOString() } : prev);
+
     // Convert cut_durations to JSON-compatible format if present
     const dbUpdates: Record<string, unknown> = {
       ...updates,
@@ -118,6 +121,8 @@ export function useQueueState() {
       .eq("id", queueState.id);
 
     if (error) {
+      // Revert optimistic update on error
+      setQueueState(queueState);
       throw new Error(error.message);
     }
   };
