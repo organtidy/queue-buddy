@@ -153,9 +153,9 @@ function BarberPole() {
   return (
     <div className="flex flex-col items-center">
       {/* Top cap */}
-      <div className="w-4 h-2 bg-muted-foreground rounded-t-full" />
-      {/* Pole body with stripes */}
-      <div className="w-3 h-16 bg-background border border-border rounded-sm overflow-hidden relative">
+      <div className="w-5 h-2 bg-muted-foreground rounded-t-full" />
+      {/* Pole body - shorter and thicker */}
+      <div className="w-4 h-12 bg-background border border-border rounded-sm overflow-hidden relative">
         <div 
           className="absolute inset-0"
           style={{
@@ -175,7 +175,7 @@ function BarberPole() {
         />
       </div>
       {/* Bottom cap */}
-      <div className="w-4 h-2 bg-muted-foreground rounded-b-full" />
+      <div className="w-5 h-2 bg-muted-foreground rounded-b-full" />
     </div>
   );
 }
@@ -195,7 +195,7 @@ function BarberStation({ professional }: { professional: Professional }) {
       </div>
 
       {/* Station layout: pole - barber - chair - pole */}
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2 mb-4">
         {/* Left barber pole */}
         <BarberPole />
         
