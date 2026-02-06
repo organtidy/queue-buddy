@@ -98,21 +98,44 @@ function BarberFigure({ color }: { color: string }) {
 
 /* ── Client seated on chair ── */
 function ClientFigure({ color }: { color: string }) {
-  const bodyColor = `color-mix(in srgb, ${color} 40%, hsl(var(--muted-foreground)))`;
-  const headColor = `color-mix(in srgb, ${color} 35%, hsl(var(--muted-foreground)))`;
+  const skinColor = `color-mix(in srgb, ${color} 30%, hsl(var(--muted-foreground)))`;
+  const capeColor = `color-mix(in srgb, ${color} 50%, hsl(var(--card)))`;
+  const capeDark = `color-mix(in srgb, ${color} 40%, black)`;
   return (
-    <div className="flex flex-col items-center">
-      <div
-        className="w-6 h-6 rounded-full border"
-        style={{ backgroundColor: headColor, borderColor: `color-mix(in srgb, ${headColor} 60%, black)` }}
+    <svg viewBox="0 0 48 52" className="w-12 h-[52px]">
+      {/* Cape / cloth draped over shoulders */}
+      <path
+        d="M8 20 Q10 16 24 15 Q38 16 40 20 L42 48 Q24 50 6 48 Z"
+        fill={capeColor}
+        stroke={capeDark}
+        strokeWidth="0.8"
       />
-      {/* Cape/cloth over body */}
-      <div className="relative -mt-0.5">
-        <div className="w-10 h-7 rounded-t-md" style={{ backgroundColor: bodyColor }} />
-        {/* Cape shimmer */}
-        <div className="absolute top-1 left-1 w-2 h-4 rounded-full opacity-20 bg-white" />
-      </div>
-    </div>
+      {/* Cape fold lines */}
+      <path d="M16 22 Q20 30 18 46" fill="none" stroke={capeDark} strokeWidth="0.4" strokeOpacity="0.3" />
+      <path d="M32 22 Q28 30 30 46" fill="none" stroke={capeDark} strokeWidth="0.4" strokeOpacity="0.3" />
+      {/* Cape collar */}
+      <path
+        d="M14 18 Q24 22 34 18"
+        fill="none"
+        stroke={capeDark}
+        strokeWidth="1"
+        strokeOpacity="0.5"
+      />
+      {/* Neck */}
+      <rect x="21" y="12" width="6" height="5" rx="2" fill={skinColor} />
+      {/* Head */}
+      <circle cx="24" cy="9" r="7.5" fill={skinColor} />
+      {/* Hair */}
+      <path
+        d="M16.5 8 Q17 2 24 1.5 Q31 2 31.5 8 Q31 6 24 5.5 Q17 6 16.5 8Z"
+        fill={`color-mix(in srgb, ${skinColor} 40%, black)`}
+      />
+      {/* Eyes */}
+      <circle cx="21" cy="9" r="1" fill="hsl(var(--card))" />
+      <circle cx="27" cy="9" r="1" fill="hsl(var(--card))" />
+      {/* Subtle smile */}
+      <path d="M22 12 Q24 13.5 26 12" fill="none" stroke="hsl(var(--card))" strokeWidth="0.6" strokeOpacity="0.5" />
+    </svg>
   );
 }
 
@@ -123,7 +146,7 @@ function BarberChair({ color, hasClient }: { color: string; hasClient: boolean }
     <div className="relative flex flex-col items-center">
       {/* Client sitting ON the chair */}
       {hasClient && (
-        <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-10">
           <ClientFigure color={color} />
         </div>
       )}
