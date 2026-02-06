@@ -149,8 +149,8 @@ function WaitingClientFigure({ color, name }: { color: string; name: string }) {
   );
 }
 
-/* ── Full Station — mirror and chair centered, barber to the side ── */
-function BarberStation({ professional }: { professional: Professional }) {
+/* ── Full Station — everything centered, barber on individual side ── */
+function BarberStation({ professional, barberSide }: { professional: Professional; barberSide: "left" | "right" }) {
   const hasClient = professional.clients_queue > 0;
 
   return (
@@ -191,8 +191,11 @@ function BarberStation({ professional }: { professional: Professional }) {
           </span>
         </div>
 
-        {/* Barber positioned absolutely to the RIGHT */}
-        <div className="absolute -right-14 bottom-8">
+        {/* Barber positioned on individual side */}
+        <div className={cn(
+          "absolute bottom-8",
+          barberSide === "left" ? "-left-14" : "-right-14"
+        )}>
           <BarberFigure color={professional.color} />
         </div>
       </div>
@@ -250,8 +253,12 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
               professionals.length > 3 && "flex-wrap"
             )}
           >
-            {professionals.map((professional) => (
-              <BarberStation key={professional.id} professional={professional} />
+            {professionals.map((professional, index) => (
+              <BarberStation
+                key={professional.id}
+                professional={professional}
+                barberSide={index % 2 === 0 ? "left" : "right"}
+              />
             ))}
           </div>
 
