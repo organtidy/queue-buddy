@@ -169,7 +169,7 @@ function WaitingClientFigure({ color, name }: { color: string; name: string }) {
   );
 }
 
-/* ── Full Station — vertically centered: badge → mirror → chair(+client) + barber → status ── */
+/* ── Full Station — mirror and chair centered, barber to the side ── */
 function BarberStation({ professional }: { professional: Professional }) {
   const hasClient = professional.clients_queue > 0;
 
@@ -187,28 +187,29 @@ function BarberStation({ professional }: { professional: Professional }) {
         {professional.name}
       </div>
 
-      {/* Mirror — centered */}
-      <Mirror color={professional.color} />
-
-      {/* Chair area with barber to the side */}
-      <div className="flex items-end gap-1">
-        {/* Barber */}
-        <div className="mb-4">
+      {/* Mirror + Chair column centered, barber beside */}
+      <div className="flex items-end gap-2">
+        {/* Barber standing to the left */}
+        <div className="mb-2">
           <BarberFigure color={professional.color} />
         </div>
 
-        {/* Chair + client stack, centered under mirror */}
-        <div className="flex flex-col items-center">
-          {hasClient && (
-            <div className="-mb-8 z-10">
-              <ClientFigure color={professional.color} />
-            </div>
-          )}
-          <BarberChair color={professional.color} />
-          {/* Status centered under chair */}
+        {/* Center column: Mirror → Client → Chair → Status */}
+        <div className="flex flex-col items-center gap-1.5">
+          <Mirror color={professional.color} />
+
+          <div className="flex flex-col items-center">
+            {hasClient && (
+              <div className="-mb-8 z-10">
+                <ClientFigure color={professional.color} />
+              </div>
+            )}
+            <BarberChair color={professional.color} />
+          </div>
+
           <span
             className={cn(
-              "text-[11px] font-bold uppercase tracking-widest mt-2",
+              "text-[11px] font-bold uppercase tracking-widest",
               hasClient ? "text-destructive" : "text-status-green"
             )}
           >
