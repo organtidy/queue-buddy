@@ -78,9 +78,9 @@ function ClientFigure({ color }: { color: string }) {
   return (
     <svg viewBox="0 0 48 44" className="w-12 h-11">
       {/* Head */}
-      <circle cx="24" cy="10" r="7.5" fill={headColor} />
+      <circle cx="24" cy="10" r="8.5" fill={headColor} />
       {/* Hair */}
-      <path d="M16.5 9 Q16.5 2 24 1 Q31.5 2 31.5 9 Q30.5 6 24 5.5 Q17.5 6 16.5 9Z" fill={hairColor} />
+      <path d="M15.5 8.5 Q15.5 1 24 0 Q32.5 1 32.5 8.5 Q31 5.5 24 5 Q17 5.5 15.5 8.5Z" fill={hairColor} />
       <path d="M16.5 10 Q16 13 18.5 14.5 L16.5 9Z" fill={hairColor} opacity="0.4" />
       <path d="M31.5 10 Q32 13 29.5 14.5 L31.5 9Z" fill={hairColor} opacity="0.4" />
       {/* Ears */}
