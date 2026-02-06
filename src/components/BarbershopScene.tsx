@@ -197,18 +197,19 @@ function BarberStation({ professional }: { professional: Professional }) {
         <div className="mb-5">
           <BarberFigure color={professional.color} />
         </div>
-        <BarberChair color={professional.color} hasClient={hasClient} />
+        <div className="flex flex-col items-center">
+          <BarberChair color={professional.color} hasClient={hasClient} />
+          {/* Status centered under the chair */}
+          <span
+            className={cn(
+              "text-[11px] font-bold uppercase tracking-widest mt-2",
+              hasClient ? "text-destructive" : "text-status-green"
+            )}
+          >
+            {hasClient ? "Ocupado" : "Disponível"}
+          </span>
+        </div>
       </div>
-
-      {/* Status */}
-      <span
-        className={cn(
-          "text-[11px] font-bold uppercase tracking-widest mt-1",
-          hasClient ? "text-destructive" : "text-status-green"
-        )}
-      >
-        {hasClient ? "Ocupado" : "Disponível"}
-      </span>
     </div>
   );
 }
