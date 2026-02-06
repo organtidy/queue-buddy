@@ -69,52 +69,32 @@ function BarberFigure({ color }: { color: string }) {
   );
 }
 
-/* ── Client seated on chair (seen from BEHIND — looking at mirror) ── */
+/* ── Client upper body on chair (back view — head + torso with cape only) ── */
 function ClientFigure({ color }: { color: string }) {
-  const skinColor = `color-mix(in srgb, ${color} 25%, hsl(var(--muted-foreground)))`;
-  const hairColor = `color-mix(in srgb, ${skinColor} 35%, black)`;
-  const capeColor = `color-mix(in srgb, ${color} 45%, hsl(var(--card)))`;
-  const capeDark = `color-mix(in srgb, ${color} 35%, black)`;
-  const pantsColor = `color-mix(in srgb, ${skinColor} 50%, black)`;
-  const shoeColor = `color-mix(in srgb, ${skinColor} 25%, black)`;
+  const headColor = `color-mix(in srgb, ${color} 35%, hsl(var(--muted-foreground)))`;
+  const hairColor = `color-mix(in srgb, ${headColor} 30%, black)`;
+  const capeColor = `color-mix(in srgb, ${color} 55%, hsl(var(--card)))`;
+  const capeDark = `color-mix(in srgb, ${color} 40%, black)`;
   return (
-    <svg viewBox="0 0 56 80" className="w-14 h-20">
-      {/* Head (back view) */}
-      <circle cx="28" cy="11" r="8" fill={skinColor} />
-      {/* Hair covering back of head */}
-      <path
-        d="M20 10 Q20 2 28 1 Q36 2 36 10 Q35 7 28 6 Q21 7 20 10Z"
-        fill={hairColor}
-      />
-      <path d="M20 11 Q19.5 14 22 16 L20 10Z" fill={hairColor} opacity="0.5" />
-      <path d="M36 11 Q36.5 14 34 16 L36 10Z" fill={hairColor} opacity="0.5" />
+    <svg viewBox="0 0 48 44" className="w-12 h-11">
+      {/* Head */}
+      <circle cx="24" cy="10" r="7.5" fill={headColor} />
+      {/* Hair */}
+      <path d="M16.5 9 Q16.5 2 24 1 Q31.5 2 31.5 9 Q30.5 6 24 5.5 Q17.5 6 16.5 9Z" fill={hairColor} />
+      <path d="M16.5 10 Q16 13 18.5 14.5 L16.5 9Z" fill={hairColor} opacity="0.4" />
+      <path d="M31.5 10 Q32 13 29.5 14.5 L31.5 9Z" fill={hairColor} opacity="0.4" />
       {/* Ears */}
-      <ellipse cx="19.5" cy="12" rx="1.8" ry="2.2" fill={skinColor} />
-      <ellipse cx="36.5" cy="12" rx="1.8" ry="2.2" fill={skinColor} />
+      <ellipse cx="16" cy="11" rx="1.6" ry="2" fill={headColor} />
+      <ellipse cx="32" cy="11" rx="1.6" ry="2" fill={headColor} />
       {/* Neck */}
-      <rect x="24" y="18" width="8" height="5" rx="3" fill={skinColor} />
-      {/* Cape draped over shoulders and torso */}
-      <path
-        d="M10 27 Q14 22 28 21 Q42 22 46 27 L47 54 Q28 56 9 54 Z"
-        fill={capeColor}
-        stroke={capeDark}
-        strokeWidth="0.7"
-      />
-      {/* Cape fold details */}
-      <path d="M19 29 Q21 40 18 53" fill="none" stroke={capeDark} strokeWidth="0.5" strokeOpacity="0.2" />
-      <path d="M37 29 Q35 40 38 53" fill="none" stroke={capeDark} strokeWidth="0.5" strokeOpacity="0.2" />
-      <path d="M28 24 L28 53" fill="none" stroke={capeDark} strokeWidth="0.3" strokeOpacity="0.12" />
-      {/* Cape collar */}
-      <path d="M15 25 Q28 29 41 25" fill="none" stroke={capeDark} strokeWidth="1.2" strokeOpacity="0.4" />
-      {/* Legs (bent, seated) */}
-      <rect x="19" y="53" width="7" height="14" rx="2.5" fill={pantsColor} />
-      <rect x="30" y="53" width="7" height="14" rx="2.5" fill={pantsColor} />
-      {/* Lower legs / feet hanging */}
-      <rect x="19" y="65" width="7" height="8" rx="2" fill={pantsColor} />
-      <rect x="30" y="65" width="7" height="8" rx="2" fill={pantsColor} />
-      {/* Shoes */}
-      <rect x="18" y="72" width="9" height="4" rx="2" fill={shoeColor} />
-      <rect x="29" y="72" width="9" height="4" rx="2" fill={shoeColor} />
+      <rect x="21" y="17" width="6" height="4" rx="2.5" fill={headColor} />
+      {/* Cape (shoulders + torso) */}
+      <path d="M6 26 Q10 21 24 20 Q38 21 42 26 L43 44 L5 44 Z" fill={capeColor} stroke={capeDark} strokeWidth="0.6" />
+      <path d="M8 25 Q12 20 24 19 Q36 20 40 25" fill="none" stroke={capeDark} strokeWidth="1" strokeOpacity="0.4" />
+      {/* Fold details */}
+      <path d="M16 27 Q17 34 15 43" fill="none" stroke={capeDark} strokeWidth="0.4" strokeOpacity="0.2" />
+      <path d="M32 27 Q31 34 33 43" fill="none" stroke={capeDark} strokeWidth="0.4" strokeOpacity="0.2" />
+      <path d="M24 22 L24 43" fill="none" stroke={capeDark} strokeWidth="0.25" strokeOpacity="0.1" />
     </svg>
   );
 }
@@ -194,7 +174,7 @@ function BarberStation({ professional }: { professional: Professional }) {
 
           <div className="flex flex-col items-center">
             {hasClient && (
-              <div className="-mb-8 z-10">
+              <div className="-mb-6 z-10">
                 <ClientFigure color={professional.color} />
               </div>
             )}
@@ -211,8 +191,8 @@ function BarberStation({ professional }: { professional: Professional }) {
           </span>
         </div>
 
-        {/* Barber positioned absolutely to the left, not affecting center alignment */}
-        <div className="absolute -left-14 bottom-8">
+        {/* Barber positioned absolutely to the RIGHT */}
+        <div className="absolute -right-14 bottom-8">
           <BarberFigure color={professional.color} />
         </div>
       </div>
