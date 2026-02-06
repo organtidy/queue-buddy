@@ -98,15 +98,17 @@ function BarberFigure({ color }: { color: string }) {
 
 /* ── Client seated on chair ── */
 function ClientFigure({ color }: { color: string }) {
+  const bodyColor = `color-mix(in srgb, ${color} 40%, hsl(var(--muted-foreground)))`;
+  const headColor = `color-mix(in srgb, ${color} 35%, hsl(var(--muted-foreground)))`;
   return (
     <div className="flex flex-col items-center">
       <div
         className="w-6 h-6 rounded-full border"
-        style={{ backgroundColor: color, borderColor: `color-mix(in srgb, ${color} 60%, black)` }}
+        style={{ backgroundColor: headColor, borderColor: `color-mix(in srgb, ${headColor} 60%, black)` }}
       />
       {/* Cape/cloth over body */}
       <div className="relative -mt-0.5">
-        <div className="w-10 h-7 rounded-t-md" style={{ backgroundColor: `color-mix(in srgb, ${color} 70%, white)` }} />
+        <div className="w-10 h-7 rounded-t-md" style={{ backgroundColor: bodyColor }} />
         {/* Cape shimmer */}
         <div className="absolute top-1 left-1 w-2 h-4 rounded-full opacity-20 bg-white" />
       </div>
