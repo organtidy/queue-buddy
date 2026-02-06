@@ -174,11 +174,13 @@ function BarberStation({ professional, barberSide }: { professional: Professiona
 
           <div className="flex flex-col items-center relative">
             {hasClient && (
-              <div className="absolute -top-8 z-10">
+              <div className="absolute -top-8 z-0">
                 <ClientFigure color={professional.color} />
               </div>
             )}
-            <BarberChair color={professional.color} />
+            <div className="relative z-10">
+              <BarberChair color={professional.color} />
+            </div>
           </div>
 
           <span
