@@ -172,9 +172,9 @@ function BarberStation({ professional, barberSide }: { professional: Professiona
         <div className="flex flex-col items-center gap-1.5">
           <Mirror color={professional.color} />
 
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center relative">
             {hasClient && (
-              <div className="-mb-6 z-10">
+              <div className="absolute -top-8 z-10">
                 <ClientFigure color={professional.color} />
               </div>
             )}
