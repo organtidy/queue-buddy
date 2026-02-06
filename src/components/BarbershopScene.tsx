@@ -187,14 +187,8 @@ function BarberStation({ professional }: { professional: Professional }) {
         {professional.name}
       </div>
 
-      {/* Mirror + Chair column centered, barber beside */}
-      <div className="flex items-end gap-2">
-        {/* Barber standing to the left */}
-        <div className="mb-2">
-          <BarberFigure color={professional.color} />
-        </div>
-
-        {/* Center column: Mirror → Client → Chair → Status */}
+      {/* Center column: Mirror → Chair → Status (all centered) */}
+      <div className="relative">
         <div className="flex flex-col items-center gap-1.5">
           <Mirror color={professional.color} />
 
@@ -215,6 +209,11 @@ function BarberStation({ professional }: { professional: Professional }) {
           >
             {hasClient ? "Ocupado" : "Disponível"}
           </span>
+        </div>
+
+        {/* Barber positioned absolutely to the left, not affecting center alignment */}
+        <div className="absolute -left-14 bottom-8">
+          <BarberFigure color={professional.color} />
         </div>
       </div>
     </div>
