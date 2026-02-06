@@ -99,30 +99,30 @@ function ClientFigure({ color }: { color: string }) {
   );
 }
 
-/* ── Modern Barber Chair ── */
+/* ── Modern Barber Chair (back view — facing mirror) ── */
 function BarberChair({ color }: { color: string }) {
   const dark = `color-mix(in srgb, ${color} 50%, black)`;
   return (
     <div className="relative flex flex-col items-center">
-      {/* Chair back */}
+      {/* Chair back (rounded top — seen from behind) */}
       <div
-        className="w-14 h-10 rounded-t-lg border-2 relative overflow-hidden"
+        className="w-14 h-12 rounded-t-2xl border-2 relative overflow-hidden"
         style={{ backgroundColor: color, borderColor: dark }}
       >
-        <div className="absolute top-2 left-2 right-2 space-y-1.5">
-          <div className="h-px bg-black/10 rounded" />
+        {/* Upholstery stitching lines */}
+        <div className="absolute top-3 left-3 right-3 space-y-2">
           <div className="h-px bg-black/10 rounded" />
           <div className="h-px bg-black/10 rounded" />
         </div>
       </div>
-      {/* Seat */}
+      {/* Seat (narrower, peeking below the back) */}
       <div
-        className="w-16 h-3 rounded-b-sm border-2 border-t-0"
+        className="w-16 h-2.5 rounded-b-sm border-2 border-t-0"
         style={{ backgroundColor: color, borderColor: dark }}
       />
-      {/* Arm rests */}
-      <div className="absolute top-6 -left-2 w-2.5 h-5 rounded-l-md" style={{ backgroundColor: dark }} />
-      <div className="absolute top-6 -right-2 w-2.5 h-5 rounded-r-md" style={{ backgroundColor: dark }} />
+      {/* Arm rests (wider, visible from back) */}
+      <div className="absolute top-5 -left-3 w-3 h-6 rounded-l-lg" style={{ backgroundColor: dark }} />
+      <div className="absolute top-5 -right-3 w-3 h-6 rounded-r-lg" style={{ backgroundColor: dark }} />
       {/* Chrome pedestal */}
       <div className="w-3 h-4 bg-muted-foreground/40 rounded-sm" />
       {/* Chrome base */}
