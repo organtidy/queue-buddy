@@ -19,6 +19,22 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt"],
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        // Don't precache index.html so updates are always fetched
+        navigateFallback: undefined,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/rwwwxrfxxgpcmegljjcw\.supabase\.co\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "supabase-api",
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 },
+            },
+          },
+        ],
+      },
       manifest: {
         name: "Filômetro Ásperus",
         short_name: "Filômetro",
