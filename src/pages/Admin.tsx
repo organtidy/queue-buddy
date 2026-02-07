@@ -94,7 +94,7 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-[100dvh] bg-background px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
       <AdminHeader onLogout={() => { 
         sessionStorage.removeItem("admin-authenticated"); 
         sessionStorage.removeItem("admin-pin");

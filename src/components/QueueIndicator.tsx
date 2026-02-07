@@ -48,12 +48,12 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
   const waitTimeFormatted = formatWaitTime(totalWaitTime);
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-3">
       {/* Main circle - number only */}
       <div
         className={cn(
           "relative flex items-center justify-center rounded-full transition-all duration-500",
-          "w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64",
+          "w-36 h-36 sm:w-48 sm:h-48 md:w-64 md:h-64",
           "border-4",
           status === "green" && "border-status-green bg-status-green/10",
           status === "yellow" && "border-status-yellow bg-status-yellow/10",
@@ -73,7 +73,7 @@ export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
         {/* Count number only */}
         <span
           className={cn(
-            "relative text-7xl sm:text-8xl md:text-9xl font-bold",
+            "relative text-6xl sm:text-8xl md:text-9xl font-bold",
             status === "green" && "text-status-green",
             status === "yellow" && "text-status-yellow",
             status === "red" && "text-status-red"
