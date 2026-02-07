@@ -27,22 +27,31 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    const isValid = await validatePin(pin);
+    const result = await validatePin(pin);
 
-    if (isValid) {
+    if (result.locked) {
+      const minutes = Math.ceil((result.retry_after || 1800) / 60);
+      toast({
+        title: "Muitas tentativas",
+        description: `Aguarde ${minutes} minutos antes de tentar novamente`,
+        variant: "destructive",
+      });
+    } else if (result.valid) {
       toast({
         title: "Login realizado",
         description: "Bem-vindo de volta!",
       });
       onSuccess();
     } else {
+      const remaining = result.attempts_remaining ?? "?";
       toast({
         title: "PIN incorreto",
-        description: "Verifique o PIN e tente novamente",
+        description: `Verifique o PIN. ${remaining} tentativas restantes.`,
         variant: "destructive",
       });
     }
 
+    setPin("");
     setIsLoading(false);
   };
 
