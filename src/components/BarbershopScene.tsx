@@ -150,8 +150,8 @@ function WaitingClientFigure({ color, name }: { color: string; name: string }) {
 }
 
 /* ── Full Station — everything centered, barber on individual side ── */
-function BarberStation({ professional, barberSide }: { professional: Professional; barberSide: "left" | "right" }) {
-  const hasClient = professional.clients_queue > 0;
+function BarberStation({ professional, barberSide, effectiveQueue }: { professional: Professional; barberSide: "left" | "right"; effectiveQueue: number }) {
+  const hasClient = effectiveQueue > 0;
 
   return (
     <div className="flex flex-col items-center gap-1.5">
@@ -220,27 +220,42 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
     );
   }
 
-  // Calculate waiting clients from individual professional queues
-  const waitingClients: { color: string; name: string }[] = [];
+  // Calculate effective queues: distribute extra global clients to professionals
+  const effectiveQueues = new Map<string, number>();
+  professionals.forEach(p => effectiveQueues.set(p.id, p.clients_queue));
+
   const totalFromProfessionals = professionals.reduce((sum, p) => sum + p.clients_queue, 0);
+  let extraClients = Math.max(0, queueCount - totalFromProfessionals);
   
+  if (extraClients > 0) {
+    const activeProfessionals = professionals.filter(p => p.is_active);
+    // First pass: fill empty chairs
+    for (const p of activeProfessionals) {
+      if (extraClients <= 0) break;
+      if (effectiveQueues.get(p.id)! === 0) {
+        effectiveQueues.set(p.id, 1);
+        extraClients--;
+      }
+    }
+    // Second pass: distribute remaining evenly
+    let i = 0;
+    while (extraClients > 0) {
+      const p = activeProfessionals[i % activeProfessionals.length];
+      effectiveQueues.set(p.id, effectiveQueues.get(p.id)! + 1);
+      extraClients--;
+      i++;
+    }
+  }
+
+  // Calculate waiting clients from effective queues
+  const waitingClients: { color: string; name: string }[] = [];
   professionals.forEach((p) => {
-    const waitingCount = Math.max(0, p.clients_queue - 1);
+    const eq = effectiveQueues.get(p.id) || 0;
+    const waitingCount = Math.max(0, eq - 1);
     for (let i = 0; i < waitingCount; i++) {
       waitingClients.push({ color: p.color, name: p.name });
     }
   });
-
-  // If global queue count exceeds sum of professional queues,
-  // distribute the extra clients evenly among active professionals
-  const extraClients = Math.max(0, queueCount - totalFromProfessionals);
-  if (extraClients > 0) {
-    const activeProfessionals = professionals.filter(p => p.is_active);
-    for (let i = 0; i < extraClients; i++) {
-      const prof = activeProfessionals[i % activeProfessionals.length];
-      waitingClients.push({ color: prof.color, name: prof.name });
-    }
-  }
 
   return (
     <div className="w-full">
@@ -271,7 +286,6 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
           >
             {[...professionals]
               .sort((a, b) => {
-                // João always first (left), Jacson always second (right)
                 if (a.name.toLowerCase() === "joão") return -1;
                 if (b.name.toLowerCase() === "joão") return 1;
                 return a.name.localeCompare(b.name);
@@ -281,6 +295,7 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
                 key={professional.id}
                 professional={professional}
                 barberSide={index % 2 === 0 ? "left" : "right"}
+                effectiveQueue={effectiveQueues.get(professional.id) || 0}
               />
             ))}
           </div>
