@@ -88,7 +88,7 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <AdminHeader />
+      <AdminHeader onLogout={() => setIsAuthenticated(false)} />
 
       <StoreStatusCard
         isOpen={queueState.is_open}

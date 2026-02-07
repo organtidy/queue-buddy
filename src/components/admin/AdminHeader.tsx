@@ -1,13 +1,12 @@
 import { Scissors, Home, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
-export function AdminHeader() {
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+interface AdminHeaderProps {
+  onLogout: () => void;
+}
 
+export function AdminHeader({ onLogout }: AdminHeaderProps) {
   return (
     <header className="flex items-center justify-between mb-6">
       <div className="flex items-center gap-2">
@@ -20,7 +19,7 @@ export function AdminHeader() {
             <Home className="w-5 h-5" />
           </Button>
         </Link>
-        <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
+        <Button variant="ghost" size="icon" onClick={onLogout} title="Sair">
           <LogOut className="w-5 h-5" />
         </Button>
       </div>
