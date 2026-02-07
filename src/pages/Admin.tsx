@@ -11,7 +11,9 @@ import { SettingsCard } from "@/components/admin/SettingsCard";
 
 
 export default function Admin() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem("admin-authenticated") === "true";
+  });
   const [showClosedTooltip, setShowClosedTooltip] = useState(false);
 
   const {
@@ -75,7 +77,7 @@ export default function Admin() {
   }
 
   if (!isAuthenticated) {
-    return <LoginForm onSuccess={() => setIsAuthenticated(true)} />;
+    return <LoginForm onSuccess={() => { sessionStorage.setItem("admin-authenticated", "true"); setIsAuthenticated(true); }} />;
   }
 
   if (!queueState) {
@@ -88,7 +90,7 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <AdminHeader onLogout={() => setIsAuthenticated(false)} />
+      <AdminHeader onLogout={() => { sessionStorage.removeItem("admin-authenticated"); setIsAuthenticated(false); }} />
 
       <StoreStatusCard
         isOpen={queueState.is_open}
