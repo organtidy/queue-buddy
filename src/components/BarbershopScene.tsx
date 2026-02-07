@@ -269,7 +269,9 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
               professionals.length > 3 && "flex-wrap"
             )}
           >
-            {professionals.map((professional, index) => (
+            {[...professionals]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((professional, index) => (
               <BarberStation
                 key={professional.id}
                 professional={professional}
