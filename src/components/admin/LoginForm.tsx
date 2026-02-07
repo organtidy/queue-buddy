@@ -21,7 +21,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [confirmPin, setConfirmPin] = useState("");
   const [phraseVerified, setPhraseVerified] = useState(false);
 
-  const { validatePin, validateSecretPhrase, updatePin } = useQueueState();
+  const { validatePin, validateSecretPhrase, resetPinWithPhrase } = useQueueState();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +93,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      await updatePin(newPin);
+      const success = await resetPinWithPhrase(secretPhrase, newPin);
+      if (!success) throw new Error("Falha ao redefinir PIN");
       toast({
         title: "PIN atualizado!",
         description: "Seu novo PIN foi salvo com sucesso.",
