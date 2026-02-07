@@ -8,7 +8,7 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StoreStatusCard } from "@/components/admin/StoreStatusCard";
 import { QueueControlCard } from "@/components/admin/QueueControlCard";
 import { SettingsCard } from "@/components/admin/SettingsCard";
-import { supabase } from "@/integrations/supabase/client";
+
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

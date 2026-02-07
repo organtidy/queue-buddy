@@ -16,8 +16,6 @@ export interface QueueState {
   message_green: string | null;
   message_yellow: string | null;
   message_red: string | null;
-  admin_pin: string | null;
-  secret_phrase: string | null;
   cut_durations: CutDuration[];
 }
 
@@ -188,31 +186,26 @@ export function useQueueState() {
   };
 
   const validatePin = async (pin: string): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from("queue_state")
-      .select("admin_pin")
-      .maybeSingle();
-
-    if (error || !data) return false;
-    return data.admin_pin === pin;
+    const { data, error } = await supabase.rpc("validate_admin_pin", { pin_input: pin });
+    if (error) return false;
+    return data === true;
   };
 
   const validateSecretPhrase = async (phrase: string): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from("queue_state")
-      .select("secret_phrase")
-      .maybeSingle();
-
-    if (error || !data) return false;
-    return data.secret_phrase?.toLowerCase() === phrase.toLowerCase();
+    const { data, error } = await supabase.rpc("validate_secret_phrase", { phrase_input: phrase });
+    if (error) return false;
+    return data === true;
   };
 
   const updatePin = async (newPin: string) => {
-    await updateQueueState({ admin_pin: newPin });
+    // This requires knowing the current PIN - handled in LoginForm via reset_admin_pin
+    throw new Error("Use resetPinWithPhrase instead");
   };
 
-  const updateSecretPhrase = async (newPhrase: string) => {
-    await updateQueueState({ secret_phrase: newPhrase });
+  const resetPinWithPhrase = async (phrase: string, newPin: string): Promise<boolean> => {
+    const { data, error } = await supabase.rpc("reset_admin_pin", { phrase_input: phrase, new_pin: newPin });
+    if (error) return false;
+    return data === true;
   };
 
   // Get effective wait time (manual takes priority)
@@ -235,8 +228,7 @@ export function useQueueState() {
     addCutDuration,
     validatePin,
     validateSecretPhrase,
-    updatePin,
-    updateSecretPhrase,
+    resetPinWithPhrase,
     getEffectiveWaitTime,
   };
 }

@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_credentials: {
+        Row: {
+          admin_pin: string
+          id: string
+          secret_phrase: string
+        }
+        Insert: {
+          admin_pin?: string
+          id?: string
+          secret_phrase?: string
+        }
+        Update: {
+          admin_pin?: string
+          id?: string
+          secret_phrase?: string
+        }
+        Relationships: []
+      }
       professionals: {
         Row: {
           clients_queue: number | null
@@ -49,7 +67,6 @@ export type Database = {
       }
       queue_state: {
         Row: {
-          admin_pin: string | null
           avg_wait_time: number
           current_count: number
           cut_durations: Json | null
@@ -60,10 +77,8 @@ export type Database = {
           message_green: string | null
           message_red: string | null
           message_yellow: string | null
-          secret_phrase: string | null
         }
         Insert: {
-          admin_pin?: string | null
           avg_wait_time?: number
           current_count?: number
           cut_durations?: Json | null
@@ -74,10 +89,8 @@ export type Database = {
           message_green?: string | null
           message_red?: string | null
           message_yellow?: string | null
-          secret_phrase?: string | null
         }
         Update: {
-          admin_pin?: string | null
           avg_wait_time?: number
           current_count?: number
           cut_durations?: Json | null
@@ -88,7 +101,6 @@ export type Database = {
           message_green?: string | null
           message_red?: string | null
           message_yellow?: string | null
-          secret_phrase?: string | null
         }
         Relationships: []
       }
@@ -97,7 +109,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reset_admin_pin: {
+        Args: { new_pin: string; phrase_input: string }
+        Returns: boolean
+      }
+      update_admin_pin_authenticated: {
+        Args: { current_pin: string; new_pin: string }
+        Returns: boolean
+      }
+      update_secret_phrase_authenticated: {
+        Args: { current_pin: string; new_phrase: string }
+        Returns: boolean
+      }
+      validate_admin_pin: { Args: { pin_input: string }; Returns: boolean }
+      validate_secret_phrase: {
+        Args: { phrase_input: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
