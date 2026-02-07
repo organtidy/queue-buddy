@@ -270,7 +270,12 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
             )}
           >
             {[...professionals]
-              .sort((a, b) => a.name.localeCompare(b.name))
+              .sort((a, b) => {
+                // João always first (left), Jacson always second (right)
+                if (a.name.toLowerCase() === "joão") return -1;
+                if (b.name.toLowerCase() === "joão") return 1;
+                return a.name.localeCompare(b.name);
+              })
               .map((professional, index) => (
               <BarberStation
                 key={professional.id}
