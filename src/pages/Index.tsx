@@ -2,8 +2,7 @@ import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff } from "lucide-reac
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
-import { QueueIndicator } from "@/components/QueueIndicator";
-import { BarbershopScene } from "@/components/BarbershopScene";
+import { QueueIndicatorWithScene } from "@/components/QueueIndicatorWithScene";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -81,11 +80,7 @@ const Index = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-3 py-2 gap-4">
-        <QueueIndicator
-          count={queueState.current_count}
-          avgWaitTime={queueState.avg_wait_time}
-        />
-        <BarbershopScene queueCount={queueState.current_count} />
+        <QueueIndicatorWithScene avgWaitTime={queueState.avg_wait_time} />
       </main>
 
       <footer className="py-2 text-center">
