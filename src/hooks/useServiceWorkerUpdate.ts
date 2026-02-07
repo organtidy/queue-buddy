@@ -45,10 +45,10 @@ export function useServiceWorkerUpdate() {
         handleNewSW(registration);
       });
 
-      // Poll for updates every 60 seconds
+      // Poll for updates every 30 days
       const interval = setInterval(() => {
         registration.update().catch(() => {});
-      }, 60 * 1000);
+      }, 30 * 24 * 60 * 60 * 1000);
 
       return () => clearInterval(interval);
     });
