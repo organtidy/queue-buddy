@@ -32,6 +32,27 @@ export type Database = {
         }
         Relationships: []
       }
+      pin_attempts: {
+        Row: {
+          attempt_count: number
+          attempt_key: string
+          last_attempt: string
+          locked_until: string | null
+        }
+        Insert: {
+          attempt_count?: number
+          attempt_key: string
+          last_attempt?: string
+          locked_until?: string | null
+        }
+        Update: {
+          attempt_count?: number
+          attempt_key?: string
+          last_attempt?: string
+          locked_until?: string | null
+        }
+        Relationships: []
+      }
       professionals: {
         Row: {
           clients_queue: number | null
