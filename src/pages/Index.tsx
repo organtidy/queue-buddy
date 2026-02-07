@@ -1,4 +1,4 @@
-import { Scissors, Settings, Volume2, VolumeX } from "lucide-react";
+import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const { queueState, loading, error } = useQueueState();
   
-  // Play sound notification when queue count changes
-  const { isMuted, toggleMute } = useQueueNotification(queueState?.current_count);
+  const { isMuted, toggleMute, notificationsEnabled, requestNotificationPermission } =
+    useQueueNotification(queueState?.current_count);
 
   if (loading) {
     return (
@@ -33,14 +33,12 @@ const Index = () => {
     );
   }
 
-  // Show closed overlay only when shop is actually closed
   if (!queueState.is_open) {
     return <ClosedOverlay />;
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
       <header className="flex items-center justify-between p-4 sm:p-6">
         <div className="flex items-center gap-3">
           <Scissors className="w-8 h-8 text-primary" />
@@ -49,6 +47,21 @@ const Index = () => {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          {!notificationsEnabled && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={requestNotificationPermission}
+              aria-label="Ativar notificações"
+              className="text-muted-foreground hover:text-foreground"
+              title="Ativar notificações"
+            >
+              <BellOff className="w-5 h-5" />
+            </Button>
+          )}
+          {notificationsEnabled && (
+            <Bell className="w-5 h-5 text-primary" />
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -67,18 +80,14 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 gap-8">
         <QueueIndicator
           count={queueState.current_count}
           avgWaitTime={queueState.avg_wait_time}
         />
-        
-        {/* Barbershop scene with professionals */}
         <BarbershopScene queueCount={queueState.current_count} />
       </main>
 
-      {/* Footer */}
       <footer className="p-4 text-center">
         <p className="text-muted-foreground text-sm">
           Atualizado em tempo real

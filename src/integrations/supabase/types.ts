@@ -65,6 +65,30 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          keys_auth: string
+          keys_p256dh: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          keys_auth: string
+          keys_p256dh: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          keys_auth?: string
+          keys_p256dh?: string
+        }
+        Relationships: []
+      }
       queue_state: {
         Row: {
           avg_wait_time: number
