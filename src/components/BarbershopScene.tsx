@@ -229,12 +229,6 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
     }
   });
 
-  // Extra unassigned clients (global count > sum of professional queues)
-  const totalFromProfessionals = professionals.reduce((sum, p) => sum + p.clients_queue, 0);
-  const extraClients = Math.max(0, queueCount - totalFromProfessionals);
-  for (let i = 0; i < extraClients; i++) {
-    waitingClients.push({ color: "hsl(var(--muted-foreground))", name: "Aguardando" });
-  }
 
   return (
     <div className="w-full">
