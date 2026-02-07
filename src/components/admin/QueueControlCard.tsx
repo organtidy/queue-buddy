@@ -13,6 +13,7 @@ interface QueueControlCardProps {
   onDecrement: () => Promise<void>;
   onReset: () => void;
   onCutComplete?: (duration: number) => Promise<void>;
+  adminPin: string;
 }
 
 // Chair SVG - larger high-quality style matching public page (no client figures)
@@ -75,8 +76,9 @@ export function QueueControlCard({
   onDecrement,
   onReset,
   onCutComplete,
+  adminPin,
 }: QueueControlCardProps) {
-  const { addClientToProfessional, removeClientFromProfessional, professionals } = useProfessionals();
+  const { addClientToProfessional, removeClientFromProfessional, professionals } = useProfessionals(adminPin);
   const [pendingAction, setPendingAction] = useState<"add" | "remove" | null>(null);
 
   // Find João and Jacson specifically

@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 
 interface LoginFormProps {
-  onSuccess: () => void;
+  onSuccess: (pin: string) => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
@@ -41,7 +41,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         title: "Login realizado",
         description: "Bem-vindo de volta!",
       });
-      onSuccess();
+      onSuccess(pin);
     } else {
       const remaining = result.attempts_remaining ?? "?";
       toast({

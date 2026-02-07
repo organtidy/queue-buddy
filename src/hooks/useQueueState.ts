@@ -21,7 +21,7 @@ export interface QueueState {
 
 const MAX_STORED_CUTS = 10;
 
-export function useQueueState() {
+export function useQueueState(adminPin?: string) {
   const [queueState, setQueueState] = useState<QueueState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,16 +96,13 @@ export function useQueueState() {
 
   const updateQueueState = async (updates: Partial<Omit<QueueState, "id" | "last_updated">>) => {
     if (!queueState) return;
+    if (!adminPin) throw new Error("Not authorized");
 
-    // Optimistic update - immediately reflect in UI
+    // Optimistic update
     setQueueState(prev => prev ? { ...prev, ...updates, last_updated: new Date().toISOString() } : prev);
 
     // Convert cut_durations to JSON-compatible format if present
-    const dbUpdates: Record<string, unknown> = {
-      ...updates,
-      last_updated: new Date().toISOString(),
-    };
-    
+    const dbUpdates: Record<string, unknown> = { ...updates };
     if (updates.cut_durations) {
       dbUpdates.cut_durations = updates.cut_durations.map(d => ({
         duration: d.duration,
@@ -113,15 +110,14 @@ export function useQueueState() {
       }));
     }
 
-    const { error } = await supabase
-      .from("queue_state")
-      .update(dbUpdates)
-      .eq("id", queueState.id);
+    const { data, error } = await supabase.rpc("admin_update_queue" as any, {
+      pin_input: adminPin,
+      updates: dbUpdates,
+    });
 
-    if (error) {
-      // Revert optimistic update on error
+    if (error || data === false) {
       setQueueState(queueState);
-      throw new Error(error.message);
+      throw new Error(error?.message || "PIN inválido");
     }
   };
 

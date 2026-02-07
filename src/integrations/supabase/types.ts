@@ -154,6 +154,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _verify_pin: { Args: { pin_input: string }; Returns: boolean }
+      admin_update_professional: {
+        Args: { pin_input: string; prof_id: string; updates: Json }
+        Returns: boolean
+      }
+      admin_update_queue: {
+        Args: { pin_input: string; updates: Json }
+        Returns: boolean
+      }
       reset_admin_pin: {
         Args: { new_pin: string; phrase_input: string }
         Returns: boolean

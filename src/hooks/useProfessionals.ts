@@ -21,7 +21,7 @@ const MIN_CUT_DURATION = 5; // minutes
 const MAX_CUT_DURATION = 120; // minutes
 const MAX_STORED_CUTS = 10;
 
-export function useProfessionals() {
+export function useProfessionals(adminPin?: string) {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,13 +77,16 @@ export function useProfessionals() {
     id: string,
     updates: Partial<Omit<Professional, "id" | "created_at">>
   ) => {
-    const { error } = await supabase
-      .from("professionals")
-      .update(updates)
-      .eq("id", id);
+    if (!adminPin) throw new Error("Not authorized");
 
-    if (error) {
-      throw new Error(error.message);
+    const { data, error } = await supabase.rpc("admin_update_professional" as any, {
+      pin_input: adminPin,
+      prof_id: id,
+      updates: updates,
+    });
+
+    if (error || data === false) {
+      throw new Error(error?.message || "PIN inválido");
     }
   };
 
