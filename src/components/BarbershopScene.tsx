@@ -220,13 +220,27 @@ export function BarbershopScene({ queueCount }: BarbershopSceneProps) {
     );
   }
 
+  // Calculate waiting clients from individual professional queues
   const waitingClients: { color: string; name: string }[] = [];
+  const totalFromProfessionals = professionals.reduce((sum, p) => sum + p.clients_queue, 0);
+  
   professionals.forEach((p) => {
     const waitingCount = Math.max(0, p.clients_queue - 1);
     for (let i = 0; i < waitingCount; i++) {
       waitingClients.push({ color: p.color, name: p.name });
     }
   });
+
+  // If global queue count exceeds sum of professional queues,
+  // distribute the extra clients evenly among active professionals
+  const extraClients = Math.max(0, queueCount - totalFromProfessionals);
+  if (extraClients > 0) {
+    const activeProfessionals = professionals.filter(p => p.is_active);
+    for (let i = 0; i < extraClients; i++) {
+      const prof = activeProfessionals[i % activeProfessionals.length];
+      waitingClients.push({ color: prof.color, name: prof.name });
+    }
+  }
 
   return (
     <div className="w-full">
