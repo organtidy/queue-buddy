@@ -145,7 +145,7 @@ export type Database = {
         Args: { current_pin: string; new_phrase: string }
         Returns: boolean
       }
-      validate_admin_pin: { Args: { pin_input: string }; Returns: boolean }
+      validate_admin_pin: { Args: { pin_input: string }; Returns: Json }
       validate_secret_phrase: {
         Args: { phrase_input: string }
         Returns: boolean

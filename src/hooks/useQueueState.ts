@@ -185,10 +185,11 @@ export function useQueueState() {
     });
   };
 
-  const validatePin = async (pin: string): Promise<boolean> => {
+  const validatePin = async (pin: string): Promise<{ valid: boolean; locked: boolean; retry_after?: number; attempts_remaining?: number }> => {
     const { data, error } = await supabase.rpc("validate_admin_pin", { pin_input: pin });
-    if (error) return false;
-    return data === true;
+    if (error) return { valid: false, locked: false };
+    const result = data as { valid: boolean; locked: boolean; retry_after?: number; attempts_remaining?: number };
+    return result;
   };
 
   const validateSecretPhrase = async (phrase: string): Promise<boolean> => {
