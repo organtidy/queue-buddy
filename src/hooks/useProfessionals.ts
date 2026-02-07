@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Professional {
@@ -23,8 +23,14 @@ const MAX_STORED_CUTS = 10;
 
 export function useProfessionals(adminPin?: string) {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const profRef = useRef<Professional[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Keep ref in sync
+  useEffect(() => {
+    profRef.current = professionals;
+  }, [professionals]);
 
   useEffect(() => {
     const fetchProfessionals = async () => {
@@ -73,7 +79,7 @@ export function useProfessionals(adminPin?: string) {
     };
   }, []);
 
-  const updateProfessional = async (
+  const updateProfessional = useCallback(async (
     id: string,
     updates: Partial<Omit<Professional, "id" | "created_at">>
   ) => {
@@ -88,62 +94,61 @@ export function useProfessionals(adminPin?: string) {
     if (error || data === false) {
       throw new Error(error?.message || "PIN inválido");
     }
-  };
+  }, [adminPin]);
 
-  const addClientToProfessional = async (professionalId: string) => {
-    const professional = professionals.find((p) => p.id === professionalId);
+  const addClientToProfessional = useCallback(async (professionalId: string) => {
+    const professional = profRef.current.find((p) => p.id === professionalId);
     if (!professional) return;
 
     const newCount = professional.clients_queue + 1;
-    
-    // If this is the first client, set the start time
-    const updates: Partial<Professional> = { 
-      clients_queue: newCount 
-    };
+    const updates: Partial<Professional> = { clients_queue: newCount };
     
     if (professional.clients_queue === 0) {
       updates.current_client_time = new Date().toISOString();
     }
 
-    await updateProfessional(professionalId, updates);
-  };
+    // Optimistic local update
+    setProfessionals(prev => prev.map(p => 
+      p.id === professionalId 
+        ? { ...p, clients_queue: newCount, current_client_time: updates.current_client_time ?? p.current_client_time }
+        : p
+    ));
 
-  const removeClientFromProfessional = async (professionalId: string): Promise<number | null> => {
-    const professional = professionals.find((p) => p.id === professionalId);
+    await updateProfessional(professionalId, updates);
+  }, [updateProfessional]);
+
+  const removeClientFromProfessional = useCallback(async (professionalId: string): Promise<number | null> => {
+    const professional = profRef.current.find((p) => p.id === professionalId);
     if (!professional || professional.clients_queue <= 0) return null;
 
     let cutDuration: number | null = null;
 
-    // Calculate cut duration if we have a start time
     if (professional.current_client_time) {
       const startTime = new Date(professional.current_client_time);
       const now = new Date();
       const durationMinutes = Math.round((now.getTime() - startTime.getTime()) / 60000);
-      
-      // Only return valid durations (between 5 and 120 minutes)
       if (durationMinutes >= MIN_CUT_DURATION && durationMinutes <= MAX_CUT_DURATION) {
         cutDuration = durationMinutes;
       }
     }
 
     const newCount = professional.clients_queue - 1;
+    const newTime = newCount > 0 ? new Date().toISOString() : null;
     
-    const updates: Partial<Professional> = { 
-      clients_queue: newCount 
-    };
-    
-    // If there are still clients, reset the timer for next client
-    // If no more clients, clear the timer
-    if (newCount > 0) {
-      updates.current_client_time = new Date().toISOString();
-    } else {
-      updates.current_client_time = null;
-    }
+    // Optimistic local update
+    setProfessionals(prev => prev.map(p => 
+      p.id === professionalId 
+        ? { ...p, clients_queue: newCount, current_client_time: newTime }
+        : p
+    ));
 
-    await updateProfessional(professionalId, updates);
+    await updateProfessional(professionalId, { 
+      clients_queue: newCount, 
+      current_client_time: newTime 
+    });
     
     return cutDuration;
-  };
+  }, [updateProfessional]);
 
   const addClientToQueue = async (professionalId: string, time: string) => {
     const professional = professionals.find((p) => p.id === professionalId);
