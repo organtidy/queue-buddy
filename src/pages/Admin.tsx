@@ -14,6 +14,9 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem("admin-authenticated") === "true";
   });
+  const [adminPin, setAdminPin] = useState<string | null>(() => {
+    return sessionStorage.getItem("admin-pin");
+  });
   const [showClosedTooltip, setShowClosedTooltip] = useState(false);
 
   const {
@@ -27,9 +30,9 @@ export default function Admin() {
     setManualWaitTime,
     setMessages,
     addCutDuration,
-  } = useQueueState();
+  } = useQueueState(adminPin || undefined);
 
-  const { professionals, updateProfessional } = useProfessionals();
+  const { professionals, updateProfessional } = useProfessionals(adminPin || undefined);
 
   const handleAction = async (action: () => Promise<void>, successMessage: string) => {
     try {
@@ -55,10 +58,7 @@ export default function Admin() {
   };
 
   const handleResetQueue = async () => {
-    // Reset count
     await resetCount();
-    
-    // Reset all professionals' clients_queue to 0 and clear timers
     for (const professional of professionals) {
       await updateProfessional(professional.id, { clients_queue: 0, current_client_time: null });
     }
@@ -76,8 +76,13 @@ export default function Admin() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <LoginForm onSuccess={() => { sessionStorage.setItem("admin-authenticated", "true"); setIsAuthenticated(true); }} />;
+  if (!isAuthenticated || !adminPin) {
+    return <LoginForm onSuccess={(pin) => { 
+      sessionStorage.setItem("admin-authenticated", "true"); 
+      sessionStorage.setItem("admin-pin", pin);
+      setAdminPin(pin);
+      setIsAuthenticated(true); 
+    }} />;
   }
 
   if (!queueState) {
@@ -90,7 +95,12 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <AdminHeader onLogout={() => { sessionStorage.removeItem("admin-authenticated"); setIsAuthenticated(false); }} />
+      <AdminHeader onLogout={() => { 
+        sessionStorage.removeItem("admin-authenticated"); 
+        sessionStorage.removeItem("admin-pin");
+        setAdminPin(null);
+        setIsAuthenticated(false); 
+      }} />
 
       <StoreStatusCard
         isOpen={queueState.is_open}
@@ -105,6 +115,7 @@ export default function Admin() {
         onDecrement={decrementCount}
         onReset={() => handleAction(handleResetQueue, "Fila zerada")}
         onCutComplete={handleCutComplete}
+        adminPin={adminPin}
       />
 
       <SettingsCard
