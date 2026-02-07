@@ -7,10 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 interface QueueControlCardProps {
-  currentCount: number;
   isOpen: boolean;
-  onIncrement: () => Promise<void>;
-  onDecrement: () => Promise<void>;
   onReset: () => void;
   onCutComplete?: (duration: number) => Promise<void>;
   adminPin: string;
@@ -70,15 +67,13 @@ const ChairIcon = ({
 };
 
 export function QueueControlCard({
-  currentCount,
   isOpen,
-  onIncrement,
-  onDecrement,
   onReset,
   onCutComplete,
   adminPin,
 }: QueueControlCardProps) {
   const { addClientToProfessional, removeClientFromProfessional, professionals } = useProfessionals(adminPin);
+  const currentCount = professionals.reduce((sum, p) => sum + p.clients_queue, 0);
   const [pendingAction, setPendingAction] = useState<"add" | "remove" | null>(null);
 
   // Find João and Jacson specifically
@@ -103,7 +98,6 @@ export function QueueControlCard({
 
     try {
       if (pendingAction === "add") {
-        await onIncrement();
         await addClientToProfessional(professionalId);
         toast({ title: "Cliente adicionado", duration: 2000 });
       } else if (pendingAction === "remove") {
@@ -111,7 +105,6 @@ export function QueueControlCard({
           toast({ title: "Sem clientes nesta cadeira", variant: "destructive" });
           return;
         }
-        await onDecrement();
         const cutDuration = await removeClientFromProfessional(professionalId);
         
         if (cutDuration !== null && onCutComplete) {

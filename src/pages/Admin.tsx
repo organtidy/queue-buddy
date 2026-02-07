@@ -109,10 +109,7 @@ export default function Admin() {
       />
 
       <QueueControlCard
-        currentCount={queueState.current_count}
         isOpen={queueState.is_open}
-        onIncrement={incrementCount}
-        onDecrement={decrementCount}
         onReset={() => handleAction(handleResetQueue, "Fila zerada")}
         onCutComplete={handleCutComplete}
         adminPin={adminPin}
