@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
@@ -11,14 +11,25 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const { queueState, loading, error, refetch } = useQueueState();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const profRefetchRef = useRef<(() => Promise<void>) | null>(null);
   
   const { isMuted, toggleMute, notificationsEnabled, requestNotificationPermission } =
     useQueueNotification(queueState?.current_count);
 
+  const handleProfRefetchReady = useCallback((fn: () => Promise<void>) => {
+    profRefetchRef.current = fn;
+  }, []);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetch();
-    setTimeout(() => setIsRefreshing(false), 1000);
+    try {
+      await Promise.all([
+        refetch(),
+        profRefetchRef.current?.(),
+      ]);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 1000);
+    }
   };
 
   if (loading) {
@@ -53,17 +64,7 @@ const Index = () => {
             Filômetro <span className="text-primary font-bold">Ásperus</span>
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleRefresh}
-            aria-label="Atualizar"
-            className="text-muted-foreground hover:text-foreground"
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`} />
-          </Button>
+        <div className="flex items-center gap-1">
           {!notificationsEnabled && (
             <Button
               variant="ghost"
@@ -71,13 +72,21 @@ const Index = () => {
               onClick={requestNotificationPermission}
               aria-label="Ativar notificações"
               className="text-muted-foreground hover:text-foreground"
-              title="Ativar notificações"
+              title="Ativar notificações do navegador"
             >
               <BellOff className="w-5 h-5" />
             </Button>
           )}
           {notificationsEnabled && (
-            <Bell className="w-5 h-5 text-primary" />
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Notificações ativadas"
+              className="text-primary cursor-default"
+              title="Notificações ativadas"
+            >
+              <Bell className="w-5 h-5" />
+            </Button>
           )}
           <Button
             variant="ghost"
@@ -85,6 +94,7 @@ const Index = () => {
             onClick={toggleMute}
             aria-label={isMuted ? "Ativar som" : "Silenciar"}
             className="text-muted-foreground hover:text-foreground"
+            title={isMuted ? "Ativar som" : "Silenciar notificações sonoras"}
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </Button>
@@ -98,11 +108,24 @@ const Index = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-3 py-2 gap-4">
-        <QueueIndicatorWithScene avgWaitTime={queueState.avg_wait_time} />
+        <QueueIndicatorWithScene
+          avgWaitTime={queueState.avg_wait_time}
+          onRefetchReady={handleProfRefetchReady}
+        />
       </main>
 
-      <footer className="py-2 text-center">
-        <p className="text-muted-foreground text-sm">
+      <footer className="py-3 flex flex-col items-center gap-2">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="gap-2 text-base px-6"
+        >
+          <RefreshCw className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`} />
+          {isRefreshing ? "Atualizando..." : "Atualizar fila"}
+        </Button>
+        <p className="text-muted-foreground text-xs">
           Atualizado em tempo real
         </p>
       </footer>

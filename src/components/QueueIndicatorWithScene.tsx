@@ -4,10 +4,16 @@ import { BarbershopScene } from "@/components/BarbershopScene";
 
 interface Props {
   avgWaitTime: number;
+  onRefetchReady?: (refetch: () => Promise<void>) => void;
 }
 
-export function QueueIndicatorWithScene({ avgWaitTime }: Props) {
-  const { professionals, loading } = useProfessionals();
+export function QueueIndicatorWithScene({ avgWaitTime, onRefetchReady }: Props) {
+  const { professionals, loading, refetch } = useProfessionals();
+
+  // Expose refetch to parent
+  if (onRefetchReady) {
+    onRefetchReady(refetch);
+  }
 
   const realCount = professionals.reduce((sum, p) => sum + p.clients_queue, 0);
 

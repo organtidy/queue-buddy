@@ -32,30 +32,30 @@ export function useProfessionals(adminPin?: string) {
     profRef.current = professionals;
   }, [professionals]);
 
+  const fetchProfessionals = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("professionals")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setProfessionals(
+        (data || []).map((p) => ({
+          ...p,
+          next_clients: Array.isArray(p.next_clients) 
+            ? (p.next_clients as string[]) 
+            : [],
+          clients_queue: p.clients_queue ?? 0,
+        }))
+      );
+    }
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    const fetchProfessionals = async () => {
-      const { data, error } = await supabase
-        .from("professionals")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setProfessionals(
-          (data || []).map((p) => ({
-            ...p,
-            next_clients: Array.isArray(p.next_clients) 
-              ? (p.next_clients as string[]) 
-              : [],
-            clients_queue: p.clients_queue ?? 0,
-          }))
-        );
-      }
-      setLoading(false);
-    };
-
     fetchProfessionals();
 
     // Subscribe to realtime changes
@@ -177,6 +177,7 @@ export function useProfessionals(adminPin?: string) {
     professionals,
     loading,
     error,
+    refetch: fetchProfessionals,
     updateProfessional,
     addClientToProfessional,
     removeClientFromProfessional,
