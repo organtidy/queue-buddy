@@ -22,9 +22,9 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
-        // Don't precache index.html so updates are always fetched
         navigateFallback: undefined,
         navigateFallbackDenylist: [/\/realtime\//],
+        importScripts: ["/custom-sw.js"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/rwwwxrfxxgpcmegljjcw\.supabase\.co\/rest\/.*/i,

@@ -51,11 +51,9 @@ export function usePushSubscription() {
         return;
       }
 
-      // Register the custom service worker for push
-      const registration = await navigator.serviceWorker.register("/custom-sw.js", {
-        scope: "/",
-      });
-      await navigator.serviceWorker.ready;
+      // Use the existing service worker (VitePWA or custom-sw)
+      const registration = await navigator.serviceWorker.ready;
+      console.log("[Push] Using SW:", registration.active?.scriptURL);
 
       // Subscribe to push
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
