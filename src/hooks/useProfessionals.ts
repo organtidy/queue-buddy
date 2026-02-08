@@ -20,6 +20,17 @@ export interface CutDuration {
 const MIN_CUT_DURATION = 5; // minutes
 const MAX_CUT_DURATION = 120; // minutes
 const MAX_STORED_CUTS = 10;
+const POLL_INTERVAL = 5000; // 5 seconds fallback polling
+
+function parseProfessionals(data: any[]): Professional[] {
+  return (data || []).map((p) => ({
+    ...p,
+    next_clients: Array.isArray(p.next_clients) 
+      ? (p.next_clients as string[]) 
+      : [],
+    clients_queue: p.clients_queue ?? 0,
+  }));
+}
 
 export function useProfessionals(adminPin?: string) {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
@@ -42,15 +53,7 @@ export function useProfessionals(adminPin?: string) {
     if (error) {
       setError(error.message);
     } else {
-      setProfessionals(
-        (data || []).map((p) => ({
-          ...p,
-          next_clients: Array.isArray(p.next_clients) 
-            ? (p.next_clients as string[]) 
-            : [],
-          clients_queue: p.clients_queue ?? 0,
-        }))
-      );
+      setProfessionals(parseProfessionals(data));
     }
     setLoading(false);
   }, []);
@@ -58,7 +61,7 @@ export function useProfessionals(adminPin?: string) {
   useEffect(() => {
     fetchProfessionals();
 
-    // Subscribe to realtime changes
+    // Primary: Realtime subscription
     const channel = supabase
       .channel("professionals_changes")
       .on(
@@ -74,10 +77,16 @@ export function useProfessionals(adminPin?: string) {
       )
       .subscribe();
 
+    // Fallback: Polling every 5s in case realtime fails
+    const pollInterval = setInterval(() => {
+      fetchProfessionals();
+    }, POLL_INTERVAL);
+
     return () => {
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchProfessionals]);
 
   const updateProfessional = useCallback(async (
     id: string,

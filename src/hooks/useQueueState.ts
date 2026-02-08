@@ -60,7 +60,7 @@ export function useQueueState(adminPin?: string) {
   useEffect(() => {
     fetchQueueState();
 
-    // Subscribe to realtime changes
+    // Primary: Realtime subscription
     const channel = supabase
       .channel("queue_state_changes")
       .on(
@@ -92,7 +92,13 @@ export function useQueueState(adminPin?: string) {
       )
       .subscribe();
 
+    // Fallback: Polling every 5s in case realtime fails
+    const pollInterval = setInterval(() => {
+      fetchQueueState();
+    }, 5000);
+
     return () => {
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, []);
