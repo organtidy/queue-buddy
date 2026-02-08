@@ -24,9 +24,10 @@ export default defineConfig(({ mode }) => ({
         clientsClaim: true,
         // Don't precache index.html so updates are always fetched
         navigateFallback: undefined,
+        navigateFallbackDenylist: [/\/realtime\//],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/rwwwxrfxxgpcmegljjcw\.supabase\.co\/.*/i,
+            urlPattern: /^https:\/\/rwwwxrfxxgpcmegljjcw\.supabase\.co\/rest\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "supabase-api",

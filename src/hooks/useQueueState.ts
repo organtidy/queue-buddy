@@ -26,35 +26,38 @@ export function useQueueState(adminPin?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchQueueState = async () => {
+    const { data, error } = await supabase
+      .from("queue_state")
+      .select("*")
+      .maybeSingle();
+
+    if (error) {
+      setError(error.message);
+    } else if (data) {
+      const rawDurations = data.cut_durations;
+      const parsedDurations: CutDuration[] = Array.isArray(rawDurations) 
+        ? rawDurations.map((d: unknown) => {
+            const item = d as { duration?: number; timestamp?: string };
+            return {
+              duration: item.duration ?? 0,
+              timestamp: item.timestamp ?? "",
+            };
+          })
+        : [];
+      setQueueState({
+        ...data,
+        cut_durations: parsedDurations,
+      });
+    }
+    setLoading(false);
+  };
+
+  const refetch = async () => {
+    await fetchQueueState();
+  };
+
   useEffect(() => {
-    // Fetch initial state
-    const fetchQueueState = async () => {
-      const { data, error } = await supabase
-        .from("queue_state")
-        .select("*")
-        .maybeSingle();
-
-      if (error) {
-        setError(error.message);
-      } else if (data) {
-        const rawDurations = data.cut_durations;
-        const parsedDurations: CutDuration[] = Array.isArray(rawDurations) 
-          ? rawDurations.map((d: unknown) => {
-              const item = d as { duration?: number; timestamp?: string };
-              return {
-                duration: item.duration ?? 0,
-                timestamp: item.timestamp ?? "",
-              };
-            })
-          : [];
-        setQueueState({
-          ...data,
-          cut_durations: parsedDurations,
-        });
-      }
-      setLoading(false);
-    };
-
     fetchQueueState();
 
     // Subscribe to realtime changes
@@ -227,5 +230,6 @@ export function useQueueState(adminPin?: string) {
     validateSecretPhrase,
     resetPinWithPhrase,
     getEffectiveWaitTime,
+    refetch,
   };
 }
