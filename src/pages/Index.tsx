@@ -1,5 +1,4 @@
-import { useState, useRef, useCallback } from "react";
-import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff, RefreshCw } from "lucide-react";
+import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
@@ -9,28 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const { queueState, loading, error, refetch } = useQueueState();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const profRefetchRef = useRef<(() => Promise<void>) | null>(null);
+  const { queueState, loading, error } = useQueueState();
   
   const { isMuted, toggleMute, notificationsEnabled, requestNotificationPermission } =
     useQueueNotification(queueState?.current_count);
-
-  const handleProfRefetchReady = useCallback((fn: () => Promise<void>) => {
-    profRefetchRef.current = fn;
-  }, []);
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await Promise.all([
-        refetch(),
-        profRefetchRef.current?.(),
-      ]);
-    } finally {
-      setTimeout(() => setIsRefreshing(false), 1000);
-    }
-  };
 
   if (loading) {
     return (
@@ -108,20 +89,7 @@ const Index = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-3 py-2 gap-4">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="gap-2 text-base px-6"
-        >
-          <RefreshCw className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`} />
-          {isRefreshing ? "Atualizando..." : "Atualizar fila"}
-        </Button>
-        <QueueIndicatorWithScene
-          avgWaitTime={queueState.avg_wait_time}
-          onRefetchReady={handleProfRefetchReady}
-        />
+        <QueueIndicatorWithScene avgWaitTime={queueState.avg_wait_time} />
       </main>
 
       <footer className="py-3 flex flex-col items-center gap-2">
