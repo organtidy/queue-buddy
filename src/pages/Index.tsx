@@ -1,4 +1,5 @@
-import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff } from "lucide-react";
+import { useState } from "react";
+import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
@@ -8,10 +9,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const { queueState, loading, error } = useQueueState();
+  const { queueState, loading, error, refetch } = useQueueState();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const { isMuted, toggleMute, notificationsEnabled, requestNotificationPermission } =
     useQueueNotification(queueState?.current_count);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
 
   if (loading) {
     return (
@@ -46,6 +54,16 @@ const Index = () => {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRefresh}
+            aria-label="Atualizar"
+            className="text-muted-foreground hover:text-foreground"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`} />
+          </Button>
           {!notificationsEnabled && (
             <Button
               variant="ghost"
