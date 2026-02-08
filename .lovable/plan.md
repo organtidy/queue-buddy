@@ -1,47 +1,47 @@
 
 
-# Corrigir Realtime na Cloudflare + Botao de Refresh
+## Exibir tempo de espera como faixa aproximada (quando manual)
 
-## Problema
-O realtime funciona no preview do Lovable mas nao no site hospedado na Cloudflare. Causa provavel: o Service Worker esta cacheando ou interferindo nas conexoes WebSocket/API do Supabase.
+### O que muda
 
-## Solucao em 2 partes
+Quando o tempo de espera **manual** estiver definido, o tempo estimado sera exibido como uma **faixa**, por exemplo:
 
-### Parte 1: Botao de Refresh na pagina publica
+- Manual = 180 min (3h) --> exibe **"2 - 3 horas"** (subtrai 1/3 do total)
+- Manual = 90 min (1h30) --> exibe **"1 - 1 hora e 30 minutos"** (subtrai 1/3)
+- Manual = 30 min --> exibe **"20 - 30 minutos"**
 
-Adicionar um botao discreto na pagina `/` que refaz a consulta ao banco. Um simples SELECT em 1 linha da tabela `queue_state` tem custo praticamente zero -- nao ha risco de consumo excessivo.
+Quando **nao** houver tempo manual, o comportamento atual permanece inalterado (tempo exato calculado automaticamente).
 
-- Botao com icone de refresh no header ou no footer
-- Ao clicar, refaz o fetch de `queue_state` e `professionals`
-- Feedback visual sutil (icone girando por 1 segundo)
-- Sem cooldown necessario -- a query e muito leve
+### Logica do calculo
 
-**Arquivo:** `src/pages/Index.tsx`
+```
+totalWaitTime = count * effectiveWaitTime
+lowerBound = totalWaitTime - (totalWaitTime / 3)   // arredondado
+upperBound = totalWaitTime
+```
 
-### Parte 2: Excluir WebSocket do cache do Service Worker
+O lower bound sera formatado de forma simplificada (ex: so "2" em vez de "2 horas") e o upper bound tera o formato completo (ex: "3 horas"), resultando em **"2 - 3 horas"**.
 
-Ajustar a configuracao do Workbox no `vite.config.ts` para garantir que as conexoes realtime do Supabase nao sejam interceptadas pelo Service Worker.
+### Arquivos alterados
 
-- Adicionar `navigateFallbackDenylist` para URLs do Supabase realtime
-- Refinar o `runtimeCaching` para excluir rotas `/realtime/` do cache
-- Garantir que apenas chamadas REST sejam cacheadas, nunca WebSocket
+**1. `src/components/QueueIndicator.tsx`**
+- Adicionar prop `isManual: boolean` ao componente
+- Criar funcao `formatWaitTimeRange(lower, upper)` que formata a faixa
+  - Se ambos estao na mesma unidade (ex: ambos em horas inteiras), exibe "2 - 3 horas"
+  - Se sao diferentes (ex: minutos e horas), formata cada um por extenso
+- Quando `isManual` for true, calcular o lower bound (total - total/3) e exibir a faixa
+- Quando `isManual` for false, manter o formato atual
 
-**Arquivo:** `vite.config.ts`
+**2. `src/components/QueueIndicatorWithScene.tsx`**
+- Passar `isManual={manualWaitTime != null}` para o `QueueIndicator`
 
----
+### Exemplos de saida
 
-## Detalhes tecnicos
-
-### Index.tsx
-- Expor uma funcao `refetch` no hook `useQueueState` que re-executa o fetch inicial
-- Adicionar botao `RefreshCw` do lucide-react no header
-- Estado `isRefreshing` para animar o icone durante o fetch
-
-### vite.config.ts
-- Alterar o `urlPattern` do runtimeCaching para excluir paths com `/realtime/`
-- Padrão atualizado: `/^https:\/\/rwwwxrfxxgpcmegljjcw\.supabase\.co\/rest\/.*/i` (apenas REST)
-
-### useQueueState.ts
-- Adicionar funcao `refetch` que chama `fetchQueueState` manualmente
-- Retornar `refetch` no objeto de retorno do hook
+| Total (min) | Lower (min) | Exibicao |
+|---|---|---|
+| 180 | 120 | 2 - 3 horas |
+| 150 | 100 | 1 hora e 40 minutos - 2 horas e 30 minutos |
+| 60 | 40 | 40 minutos - 1 hora |
+| 30 | 20 | 20 - 30 minutos |
+| 0 | 0 | Sem espera |
 
