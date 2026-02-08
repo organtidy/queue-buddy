@@ -108,13 +108,6 @@ const Index = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-3 py-2 gap-4">
-        <QueueIndicatorWithScene
-          avgWaitTime={queueState.avg_wait_time}
-          onRefetchReady={handleProfRefetchReady}
-        />
-      </main>
-
-      <footer className="py-3 flex flex-col items-center gap-2">
         <Button
           variant="outline"
           size="lg"
@@ -125,6 +118,13 @@ const Index = () => {
           <RefreshCw className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`} />
           {isRefreshing ? "Atualizando..." : "Atualizar fila"}
         </Button>
+        <QueueIndicatorWithScene
+          avgWaitTime={queueState.avg_wait_time}
+          onRefetchReady={handleProfRefetchReady}
+        />
+      </main>
+
+      <footer className="py-3 flex flex-col items-center gap-2">
         <p className="text-muted-foreground text-xs">
           Atualizado em tempo real
         </p>
