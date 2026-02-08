@@ -2,6 +2,7 @@ import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff } from "lucide-reac
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 import { QueueIndicatorWithScene } from "@/components/QueueIndicatorWithScene";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,8 +11,9 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const { queueState, loading, error } = useQueueState();
   
-  const { isMuted, toggleMute, notificationsEnabled, requestNotificationPermission } =
-    useQueueNotification(queueState?.current_count);
+  const { isMuted, toggleMute } = useQueueNotification(queueState?.current_count);
+  
+  const { isSubscribed, isSupported, isLoading, subscribe, unsubscribe } = usePushSubscription();
 
   if (loading) {
     return (
@@ -46,27 +48,17 @@ const Index = () => {
           </h1>
         </div>
         <div className="flex items-center gap-1">
-          {!notificationsEnabled && (
+          {isSupported && (
             <Button
               variant="ghost"
               size="icon"
-              onClick={requestNotificationPermission}
-              aria-label="Ativar notificações"
-              className="text-muted-foreground hover:text-foreground"
-              title="Ativar notificações do navegador"
+              onClick={isSubscribed ? unsubscribe : subscribe}
+              disabled={isLoading}
+              aria-label={isSubscribed ? "Desativar notificações push" : "Ativar notificações push"}
+              className={isSubscribed ? "text-primary" : "text-muted-foreground hover:text-foreground"}
+              title={isSubscribed ? "Notificações push ativadas" : "Ativar notificações push"}
             >
-              <BellOff className="w-5 h-5" />
-            </Button>
-          )}
-          {notificationsEnabled && (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Notificações ativadas"
-              className="text-primary cursor-default"
-              title="Notificações ativadas"
-            >
-              <Bell className="w-5 h-5" />
+              {isSubscribed ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
             </Button>
           )}
           <Button
