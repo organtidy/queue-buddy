@@ -15,7 +15,7 @@ export function QueueIndicatorWithScene({ avgWaitTime, manualWaitTime }: Props) 
 
   return (
     <>
-      <QueueIndicator count={realCount} avgWaitTime={effectiveWaitTime} />
+      <QueueIndicator count={realCount} avgWaitTime={effectiveWaitTime} isManual={manualWaitTime != null} />
       <BarbershopScene queueCount={realCount} />
     </>
   );

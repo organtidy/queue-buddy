@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 interface QueueIndicatorProps {
   count: number;
   avgWaitTime: number;
+  isManual?: boolean;
 }
 
 type QueueStatus = "green" | "yellow" | "red";
@@ -41,11 +42,42 @@ function formatWaitTime(minutes: number): string {
   return `${hours} hora${hours !== 1 ? "s" : ""} e ${remainingMinutes} minuto${remainingMinutes !== 1 ? "s" : ""}`;
 }
 
-export function QueueIndicator({ count, avgWaitTime }: QueueIndicatorProps) {
+function formatWaitTimeRange(lower: number, upper: number): string {
+  if (upper === 0) return "Sem espera";
+
+  const lowerH = Math.floor(lower / 60);
+  const lowerM = lower % 60;
+  const upperH = Math.floor(upper / 60);
+  const upperM = upper % 60;
+
+  // Both pure hours (no remaining minutes)
+  if (lowerM === 0 && upperM === 0 && lowerH > 0) {
+    return `${lowerH} - ${upperH} hora${upperH !== 1 ? "s" : ""}`;
+  }
+
+  // Both pure minutes (no hours)
+  if (lowerH === 0 && upperH === 0) {
+    return `${lowerM} - ${upperM} minuto${upperM !== 1 ? "s" : ""}`;
+  }
+
+  // Mixed: format each side fully
+  const lowerStr = formatWaitTime(lower);
+  const upperStr = formatWaitTime(upper);
+  return `${lowerStr} - ${upperStr}`;
+}
+
+export function QueueIndicator({ count, avgWaitTime, isManual = false }: QueueIndicatorProps) {
   const status = getQueueStatus(count);
   const message = getStatusMessage(status);
   const totalWaitTime = count * avgWaitTime;
-  const waitTimeFormatted = formatWaitTime(totalWaitTime);
+
+  let waitTimeFormatted: string;
+  if (isManual && totalWaitTime > 0) {
+    const lowerBound = Math.round(totalWaitTime - totalWaitTime / 3);
+    waitTimeFormatted = formatWaitTimeRange(lowerBound, totalWaitTime);
+  } else {
+    waitTimeFormatted = formatWaitTime(totalWaitTime);
+  }
 
   return (
     <div className="flex flex-col items-center gap-3">
