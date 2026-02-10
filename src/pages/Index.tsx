@@ -1,8 +1,9 @@
-import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff } from "lucide-react";
+import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
+import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { QueueIndicatorWithScene } from "@/components/QueueIndicatorWithScene";
 import { BrazilianClock } from "@/components/BrazilianClock";
 import { ClosedOverlay } from "@/components/ClosedOverlay";
@@ -15,6 +16,7 @@ const Index = () => {
   const { isMuted, toggleMute } = useQueueNotification(queueState?.current_count);
   
   const { isSubscribed, isSupported, isLoading, subscribe, unsubscribe } = usePushSubscription();
+  const onlineCount = useOnlinePresence();
 
   if (loading) {
     return (
@@ -87,6 +89,10 @@ const Index = () => {
       </main>
 
       <footer className="py-3 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+          <Eye className="w-3.5 h-3.5" />
+          <span>{onlineCount} {onlineCount === 1 ? "pessoa assistindo" : "pessoas assistindo"} agora</span>
+        </div>
         <p className="text-muted-foreground text-xs">
           Atualizado em tempo real
         </p>
