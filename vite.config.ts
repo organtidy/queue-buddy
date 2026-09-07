@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        cleanupOutdatedCaches: true,
         navigateFallback: "index.html",
         navigateFallbackDenylist: [/\/realtime\//],
         importScripts: ["/custom-sw.js"],
@@ -42,11 +43,14 @@ export default defineConfig(({ mode }) => ({
         name: "Filômetro Ásperus",
         short_name: "Filômetro",
         description: "Acompanhe a fila da barbearia Ásperus em tempo real",
+        lang: "pt-BR",
+        dir: "ltr",
         theme_color: "#0a0a0a",
         background_color: "#0a0a0a",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
+        categories: ["utilities", "lifestyle"],
         icons: [
           {
             src: "/pwa-192x192.png",
@@ -65,6 +69,22 @@ export default defineConfig(({ mode }) => ({
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
+          },
+        ],
+        shortcuts: [
+          {
+            name: "Fila em Tempo Real",
+            short_name: "Fila",
+            description: "Ver a fila atual da barbearia",
+            url: "/",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Área do Barbeiro",
+            short_name: "Barbeiro",
+            description: "Acessar painel do barbeiro",
+            url: "/admin",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
           },
         ],
       },
