@@ -1,73 +1,33 @@
-# Welcome to your Lovable project
+# Filômetro Ásperus 💈
 
-## Project info
+Sistema de acompanhamento da fila da Barbearia Ásperus em tempo real, com controle de barbeiros, cálculo de tempo estimado e notificações sonoras para celulares e computadores.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Funcionalidades
 
-## How can I edit this code?
+- **Painel em Tempo Real**: Visualização da quantidade de clientes na fila e tempo médio de espera.
+- **Área do Barbeiro**: Painel administrativo protegido por PIN para controle de clientes e cadeiras (João e Jacson).
+- **Notificações Sonoras Inteligentes**:
+  - Som harmônico ascendente quando entra um cliente na fila.
+  - Som suave descendente quando um cliente sai da fila.
+  - Desbloqueio automático de áudio para navegadores móveis (iOS Safari e Android Chrome).
+- **PWA (Progressive Web App)**: Instalável no celular, suporte offline e ícones dedicados.
 
-There are several ways of editing your application.
+## 🛠️ Tecnologias
 
-**Use Lovable**
+- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Radix UI.
+- **PWA**: `vite-plugin-pwa`, Service Workers.
+- **Sons**: Web Audio API com síntese harmônica pura (sem dependência de arquivos externos).
+- **Hospedagem**: Cloudflare Pages.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 📦 Como rodar localmente
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+# 1. Instalar dependências
+npm install
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 2. Rodar o servidor de desenvolvimento
 npm run dev
+
+# 3. Gerar build de produção
+npm run build
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
