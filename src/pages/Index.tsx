@@ -1,6 +1,7 @@
 import { Scissors, Settings, Volume2, VolumeX, Bell, BellOff, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueueState } from "@/hooks/useQueueState";
+import { useProfessionals } from "@/hooks/useProfessionals";
 import { useQueueNotification } from "@/hooks/useQueueNotification";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
@@ -12,8 +13,10 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { queueState, loading, error } = useQueueState();
-  
-  const { isMuted, toggleMute } = useQueueNotification(queueState?.current_count);
+  const { professionals } = useProfessionals();
+
+  const realCount = professionals.reduce((sum, p) => sum + (p.clients_queue || 0), 0);
+  const { isMuted, toggleMute } = useQueueNotification(realCount);
   
   const { isSubscribed, isSupported, isLoading, subscribe, unsubscribe } = usePushSubscription();
   const onlineCount = useOnlinePresence();
