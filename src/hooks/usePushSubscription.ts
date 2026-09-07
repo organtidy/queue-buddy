@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const VAPID_PUBLIC_KEY = "BCNtQp4zqfJPRAYqZn3TDrs-Sj2cfZmNbJUS0h904rlVBYfY1DsavMQGJDtehVCv3hgi9x89qHpQoixTpige1_s";
+const VAPID_PUBLIC_KEY =
+  import.meta.env.VITE_VAPID_PUBLIC_KEY ||
+  "BCNtQp4zqfJPRAYqZn3TDrs-Sj2cfZmNbJUS0h904rlVBYfY1DsavMQGJDtehVCv3hgi9x89qHpQoixTpige1_s";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -64,22 +66,28 @@ export function usePushSubscription() {
 
       const subJson = subscription.toJSON();
       
-      // Save to Supabase
-      const { error } = await supabase.from("push_subscriptions").upsert(
-        {
-          endpoint: subJson.endpoint!,
-          keys_p256dh: subJson.keys!.p256dh!,
-          keys_auth: subJson.keys!.auth!,
-        },
-        { onConflict: "endpoint" }
-      );
+      // Save to Supabase using secure RPC with fallback to upsert
+      const { error: rpcError } = await supabase.rpc("save_push_subscription" as any, {
+        endpoint_input: subJson.endpoint!,
+        p256dh_input: subJson.keys!.p256dh!,
+        auth_input: subJson.keys!.auth!,
+      });
 
-      if (error) {
-        console.error("Error saving push subscription:", error);
-      } else {
-        setIsSubscribed(true);
-        console.log("Push subscription saved successfully");
+      if (rpcError) {
+        console.warn("RPC save_push_subscription fallback to upsert:", rpcError);
+        const { error: upsertError } = await supabase.from("push_subscriptions").upsert(
+          {
+            endpoint: subJson.endpoint!,
+            keys_p256dh: subJson.keys!.p256dh!,
+            keys_auth: subJson.keys!.auth!,
+          },
+          { onConflict: "endpoint" }
+        );
+        if (upsertError) throw upsertError;
       }
+
+      setIsSubscribed(true);
+      console.log("Push subscription saved successfully");
     } catch (err) {
       console.error("Error subscribing to push:", err);
     } finally {
@@ -99,8 +107,14 @@ export function usePushSubscription() {
         const endpoint = subscription.endpoint;
         await subscription.unsubscribe();
 
-        // Remove from Supabase
-        await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
+        // Remove from Supabase using secure RPC with fallback
+        const { error: rpcError } = await supabase.rpc("delete_push_subscription" as any, {
+          endpoint_input: endpoint,
+        });
+
+        if (rpcError) {
+          await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
+        }
       }
 
       setIsSubscribed(false);

@@ -37,7 +37,15 @@ self.addEventListener("notificationclick", (event) => {
   console.log("[SW] Notification clicked");
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || "/";
+  let urlToOpen = event.notification.data?.url || "/";
+  if (
+    typeof urlToOpen !== "string" ||
+    !urlToOpen.startsWith("/") ||
+    urlToOpen.startsWith("//") ||
+    urlToOpen.includes(":")
+  ) {
+    urlToOpen = "/";
+  }
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {

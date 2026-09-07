@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório de Auditoria de Segurança Defensiva - Filômetro Ásperus</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --heading: #f0f6fc;
+      --primary: #58a6ff;
+      --danger: #f85149;
+      --warning: #d29922;
+      --success: #3fb950;
+      --code-bg: #0a0d12;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    h1, h2, h3, h4 {
+      color: var(--heading);
+      margin-top: 1.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-high { background-color: rgba(248, 81, 73, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+    .badge-med { background-color: rgba(210, 153, 34, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-ok { background-color: rgba(63, 185, 80, 0.15); color: var(--success); border: 1px solid var(--success); }
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th {
+      background-color: #21262d;
+      color: var(--heading);
+    }
+    pre, code {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
+    }
+    code {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.875rem;
+    }
+    pre {
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    pre code {
+      border: none;
+      padding: 0;
+    }
+    .didactic-box {
+      background-color: rgba(88, 166, 255, 0.08);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛡️ Relatório de Auditoria de Cibersegurança Defensiva</h1>
+      <p><strong>Projeto:</strong> Filômetro Ásperus (<code>queue-buddy</code>) | <strong>Data:</strong> 07 de Setembro de 2026</p>
+      <p><strong>Modo:</strong> STATIC_ONLY (Autorizado pelo Proprietário) | <strong>Rigor:</strong> OWASP ASVS 5.0 / OWASP Top 10:2025</p>
+    </header>
+
+    <div class="card">
+      <h2>1. Sumário Executivo</h2>
+      <p>A auditoria defensiva de código e arquitetura identificou um conjunto de pontos fortes relevantes na aplicação (como a proteção contra injeções SQL e a restrição de escrita direta nas tabelas da fila). Contudo, foram confirmadas <strong>3 vulnerabilidades de severidade ALTA</strong> relacionadas a políticas de banco de dados, autenticação de funções e disparo de notificações.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Vulnerabilidade</th>
+            <th>Severidade</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AUD-001</td>
+            <td>Vazamento e Manipulação Irrestrita da Base de Assinantes Web Push</td>
+            <td><span class="badge badge-high">ALTA (7.1)</span></td>
+            <td>Confirmado</td>
+          </tr>
+          <tr>
+            <td>AUD-002</td>
+            <td>Bypass de Autenticação do Barbeiro via Função _verify_pin Sem Rate Limit</td>
+            <td><span class="badge badge-high">ALTA (7.5)</span></td>
+            <td>Confirmado</td>
+          </tr>
+          <tr>
+            <td>AUD-003</td>
+            <td>Invocação Não Autenticada da Edge Function send-push-notification</td>
+            <td><span class="badge badge-high">ALTA (7.2)</span></td>
+            <td>Confirmado</td>
+          </tr>
+          <tr>
+            <td>AUD-004</td>
+            <td>Negação de Serviço no Acesso Administrativo por Bloqueio Global (global_pin)</td>
+            <td><span class="badge badge-med">MÉDIA (5.3)</span></td>
+            <td>Confirmado</td>
+          </tr>
+          <tr>
+            <td>AUD-005</td>
+            <td>Armazenamento de Credenciais em Texto Claro (admin_credentials)</td>
+            <td><span class="badge badge-med">MÉDIA (4.8)</span></td>
+            <td>Confirmado</td>
+          </tr>
+          <tr>
+            <td>AUD-006</td>
+            <td>Ausência de Validação de Domínio no Redirecionamento de Notificações</td>
+            <td><span class="badge badge-med">BAIXA (3.5)</span></td>
+            <td>Confirmado</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>2. Detalhamento Didático e Técnico dos Achados</h2>
+
+    <!-- AUD-001 -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>AUD-001 — Vazamento e Manipulação da Base de Assinantes Web Push</h3>
+        <span class="badge badge-high">ALTA</span>
+      </div>
+      <div class="didactic-box">
+        <strong>Entenda a brecha:</strong>
+        <p>A tabela de notificações de celular dos clientes foi deixada aberta para leitura e exclusão pública. Qualquer visitante do site pode extrair a lista de todos os celulares cadastrados ou apagar as inscrições de todo mundo com uma única linha de código no navegador.</p>
+      </div>
+      <p><strong>Arquivo:</strong> <code>supabase/migrations/20260208033525_f48525e5-2c6b-4bb2-a47a-4e6e489d9ebc.sql:10-21</code></p>
+      <p><strong>Causa Raiz:</strong> As políticas de Row-Level Security criadas com <code>FOR SELECT TO anon USING (true)</code> e <code>FOR DELETE TO anon USING (true)</code>.</p>
+      <p><strong>Correção Imediata:</strong></p>
+      <pre><code>DROP POLICY IF EXISTS "Allow anonymous select" ON public.push_subscriptions;
+DROP POLICY IF EXISTS "Allow anonymous delete" ON public.push_subscriptions;
+DROP POLICY IF EXISTS "Allow anonymous update" ON public.push_subscriptions;</code></pre>
+    </div>
+
+    <!-- AUD-002 -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>AUD-002 — Bypass de Autenticação do Barbeiro via Função _verify_pin</h3>
+        <span class="badge badge-high">ALTA</span>
+      </div>
+      <div class="didactic-box">
+        <strong>Entenda a brecha:</strong>
+        <p>Foi criada uma função auxiliar interna no banco de dados para checar se o PIN está certo. Como ela não tem trava de tentativas erradas e pode ser chamada livremente pela internet, um robô consegue testar todos os 10.000 números possíveis em menos de 1 minuto e descobrir a senha do barbeiro.</p>
+      </div>
+      <p><strong>Arquivo:</strong> <code>supabase/migrations/20260207112405_b5e72a0b-d1e5-411a-91fd-8216587f29f5.sql:3-11</code></p>
+      <p><strong>Causa Raiz:</strong> Falta de revogação de permissão pública para a função <code>_verify_pin</code>.</p>
+      <p><strong>Correção Imediata:</strong></p>
+      <pre><code>REVOKE EXECUTE ON FUNCTION public._verify_pin(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public._verify_pin(text) TO postgres, service_role;</code></pre>
+    </div>
+
+    <!-- AUD-003 -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>AUD-003 — Invocação Não Autenticada de Push (Spam em Massa)</h3>
+        <span class="badge badge-high">ALTA</span>
+      </div>
+      <div class="didactic-box">
+        <strong>Entenda a brecha:</strong>
+        <p>O serviço que envia mensagens para os telefones não confere quem está chamando. Qualquer pessoa na internet pode enviar uma mensagem técnica para esse serviço e fazer os celulares dos clientes tocarem e vibrarem sem parar.</p>
+      </div>
+      <p><strong>Arquivo:</strong> <code>supabase/config.toml:3-4</code> e <code>supabase/functions/send-push-notification/index.ts</code></p>
+      <p><strong>Causa Raiz:</strong> Desativação de JWT na configuração sem segredo alternativo no handler Deno.</p>
+      <p><strong>Correção Imediata:</strong> Adicionar validação de segredo de cabeçalho <code>X-Webhook-Secret</code> na função Edge e no trigger SQL.</p>
+    </div>
+
+    <div class="card">
+      <h2>3. Controles Positivos Aprovados</h2>
+      <ul>
+        <li>✅ <strong>Escrita Direta Bloqueada:</strong> Nenhuma tabela de negócios aceita mutação pública direta; todas exigem RPC com validação server-side.</li>
+        <li>✅ <strong>admin_credentials Isolada:</strong> Políticas estritas impedem qualquer leitura direta da tabela de credenciais.</li>
+        <li>✅ <strong>Segurança contra SQLi:</strong> Utilização consistente de consultas parametrizadas e estruturadas em PL/pgSQL.</li>
+        <li>✅ <strong>Variáveis de Ambiente:</strong> Abstração correta no frontend via <code>import.meta.env</code> sem exposição estática em bundles.</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
