@@ -9,8 +9,12 @@ export function useOnlinePresence() {
   const [onlineCount, setOnlineCount] = useState(0);
 
   useEffect(() => {
+    const presenceKey = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `user_${Math.random().toString(36).substring(2)}_${Date.now()}`;
+
     const channel = supabase.channel("online-users", {
-      config: { presence: { key: crypto.randomUUID() } },
+      config: { presence: { key: presenceKey } },
     });
 
     channel

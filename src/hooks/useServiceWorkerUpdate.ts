@@ -9,6 +9,22 @@ export function useServiceWorkerUpdate() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
+    let hadController = Boolean(navigator.serviceWorker.controller);
+    let refreshing = false;
+
+    // When a NEW SW takes over an existing controller, reload the page
+    const onControllerChange = () => {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    };
+
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+
     const handleNewSW = (registration: ServiceWorkerRegistration) => {
       const newWorker = registration.waiting || registration.installing;
       if (!newWorker) return;
@@ -23,13 +39,7 @@ export function useServiceWorkerUpdate() {
       newWorker.addEventListener("statechange", onStateChange);
     };
 
-    // When the new SW takes over, reload the page automatically
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    });
+    let checkInterval: NodeJS.Timeout | null = null;
 
     // Check existing registration
     navigator.serviceWorker.getRegistration().then((registration) => {
@@ -45,12 +55,23 @@ export function useServiceWorkerUpdate() {
         handleNewSW(registration);
       });
 
-      // Poll for updates every 30 days
-      const interval = setInterval(() => {
+      // Poll for updates every 15 minutes
+      checkInterval = setInterval(() => {
         registration.update().catch(() => {});
-      }, 30 * 24 * 60 * 60 * 1000);
+      }, 15 * 60 * 1000);
 
-      return () => clearInterval(interval);
+      // Check on tab visibility change (e.g. user resumes app)
+      const onVisibilityChange = () => {
+        if (document.visibilityState === "visible") {
+          registration.update().catch(() => {});
+        }
+      };
+      document.addEventListener("visibilitychange", onVisibilityChange);
     });
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      if (checkInterval) clearInterval(checkInterval);
+    };
   }, []);
 }

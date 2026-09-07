@@ -61,9 +61,10 @@ export function useProfessionals(adminPin?: string) {
   useEffect(() => {
     fetchProfessionals();
 
-    // Primary: Realtime subscription
+    // Primary: Realtime subscription with unique channel name to avoid collisions
+    const channelId = `professionals_${Math.random().toString(36).substring(2, 9)}`;
     const channel = supabase
-      .channel("professionals_changes")
+      .channel(channelId)
       .on(
         "postgres_changes",
         {

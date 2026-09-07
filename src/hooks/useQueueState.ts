@@ -60,9 +60,10 @@ export function useQueueState(adminPin?: string) {
   useEffect(() => {
     fetchQueueState();
 
-    // Primary: Realtime subscription
+    // Primary: Realtime subscription with unique channel name
+    const channelId = `queue_state_${Math.random().toString(36).substring(2, 9)}`;
     const channel = supabase
-      .channel("queue_state_changes")
+      .channel(channelId)
       .on(
         "postgres_changes",
         {

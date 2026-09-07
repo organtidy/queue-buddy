@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
-        navigateFallback: undefined,
+        navigateFallback: "index.html",
         navigateFallbackDenylist: [/\/realtime\//],
         importScripts: ["/custom-sw.js"],
         runtimeCaching: [
@@ -37,6 +37,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
+        id: "/",
+        scope: "/",
         name: "Filômetro Ásperus",
         short_name: "Filômetro",
         description: "Acompanhe a fila da barbearia Ásperus em tempo real",
@@ -50,11 +52,13 @@ export default defineConfig(({ mode }) => ({
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/pwa-512x512.png",
@@ -66,6 +70,10 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ].filter(Boolean),
+  preview: {
+    port: 4173,
+    host: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
